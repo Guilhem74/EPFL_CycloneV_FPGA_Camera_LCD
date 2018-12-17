@@ -1,0 +1,157 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+ 
+
+Entity Acquisition_module is
+Port(
+ Clk : IN STD_LOGIC ;
+ Reset_n : IN STD_LOGIC ;
+
+-- Avalon Slave :
+ FVAL : IN STD_LOGIC;
+ LVAL : IN STD_LOGIC ;
+ Data_Camera : IN STD_LOGIC_VECTOR(11 downto 0) ;
+ Out_Pixel: OUT STD_LOGIC_VECTOR(15 downto 0) ;
+ Pixel_Valid_Out: OUT STD_LOGIC
+) ; 
+end entity Acquisition_module;
+Architecture Comp of Acquisition_module is
+
+	signal Data_Write_FIFO_Store_Line,Data_Read_FIFO_Store_Line: STD_LOGIC_VECTOR(15 downto 0);
+	signal Write_Req_FIFO_Store_Line,Read_Req_FIFO_Store_Line: std_logic;
+	signal Clear_FIFO_Store_Line,Empty_FIFO_Store_Line,Full_FIFO_Store_Line: std_logic;
+	signal Number_Words_FIFO_Store_Line: STD_LOGIC_VECTOR(9 downto 0);
+	Component FIFO_Store_Line IS
+	PORT
+	(
+		clock		: IN STD_LOGIC ;
+		data		: IN STD_LOGIC_VECTOR (15 DOWNTO 0);
+		rdreq		: IN STD_LOGIC ;
+		sclr		: IN STD_LOGIC ;
+		wrreq		: IN STD_LOGIC ;
+		empty		: OUT STD_LOGIC ;
+		full		: OUT STD_LOGIC ;
+		q		: OUT STD_LOGIC_VECTOR (15 DOWNTO 0);
+		usedw		: OUT STD_LOGIC_VECTOR (9 DOWNTO 0)
+	);
+	END component FIFO_Store_Line;
+	
+	TYPE Acquisition_State IS (Idle_Frame,Idle_Line, Getting_Pixels);
+	Signal State: Acquisition_State;
+	signal Pixel_Number:integer :=0;
+	signal Line_Number:integer :=0;
+	signal Pixel_Value_Even: STD_LOGIC_VECTOR(4 downto 0);
+	signal FVAL_Previous,LVAL_Previous: std_logic;
+	signal Data_Camera1,Data_Camera2 : STD_LOGIC_VECTOR(23 downto 0);
+
+Begin 
+	FIFO_Store_Line_inst : FIFO_Store_Line PORT MAP (
+		clock	 => Clk,
+		data	 => Data_Write_FIFO_Store_Line,
+		rdreq	 => Read_Req_FIFO_Store_Line,
+		sclr	 => Clear_FIFO_Store_Line,
+		wrreq	 => Write_Req_FIFO_Store_Line,
+		empty	 => Empty_FIFO_Store_Line,
+		full	 => Full_FIFO_Store_Line,
+		q	 => Data_Read_FIFO_Store_Line,
+		usedw	 => Number_Words_FIFO_Store_Line
+	);
+
+	-- Use of the avalon Bus
+	Camera_Acq:
+	Process(Clk, Reset_n)
+		variable Convert_Pixel: unsigned(11 downto 0)  :=(others=>'0');
+		variable Storage_Pixel: STD_LOGIC_VECTOR(4 downto 0):="00000";
+		begin
+		if Reset_n = '0' then
+			Clear_FIFO_Store_Line<='0';
+			Data_Write_FIFO_Store_Line(15 downto 0)<=(others => '0');
+			Write_Req_FIFO_Store_Line<='0';
+			Read_Req_FIFO_Store_Line<='0';
+			Clear_FIFO_Store_Line<='1';
+			State<=Idle_Frame;
+			Pixel_Number<=0;
+			Line_Number<=0;
+			Pixel_Valid_Out<='0';
+			Out_Pixel<=(others=>'0');
+			Pixel_Value_Even<=(others=>'0');
+		elsif rising_edge(Clk) then
+			FVAL_Previous<=FVAL;
+			LVAL_Previous<=LVAL;
+			Clear_FIFO_Store_Line<='0';
+			Data_Write_FIFO_Store_Line(15 downto 0)<=(others => '0');
+			Write_Req_FIFO_Store_Line<='0';
+			Read_Req_FIFO_Store_Line<='0';
+			Clear_FIFO_Store_Line<='0';
+			Out_Pixel<=(others=>'0');
+			Pixel_Valid_Out<='0';
+			Data_Camera1<=(others=>'0');
+			Data_Camera2<=(others=>'0');
+			case State is
+				when Idle_Frame =>
+					if FVAL='1' and FVAL_Previous='0' then --Rising edge of FVAL 
+						State<=Idle_Line;
+					end if;
+					Pixel_Number<=0;
+					Line_Number<=0;
+					Pixel_Value_Even<=(others => '0');
+					Clear_FIFO_Store_Line<='1';
+				when Idle_Line =>
+					Pixel_Number<=0;
+					Pixel_Value_Even<=(others => '0');
+					if LVAL='1' and LVAL_Previous='0' then --Rising edge of LVAL and read the first pixel
+						State<=Getting_Pixels;
+						Convert_Pixel:=(unsigned(Data_Camera)*32/4096);
+						Storage_Pixel:=std_logic_vector(Convert_Pixel(4 downto 0));
+						Pixel_Value_Even<=Storage_Pixel;
+						Data_Camera1<=std_logic_vector(unsigned(Data_Camera)*32);
+						Data_Camera2<=std_logic_vector(unsigned(Data_Camera)*32/4096);
+						Pixel_Number<=1;
+						if Line_Number mod 2=1 then --Even Line, need to request the fifo_tmp value
+							Read_Req_FIFO_Store_Line<='1';--Ask value to the fifo_tmp
+						end if;
+					end if;
+				when Getting_Pixels =>
+					if LVAL='0' and (LVAL_Previous='1' and (FVAL='1' and FVAL_Previous='1')) then --Falling edge of LVAL 
+						State<=Idle_Line;
+						Line_Number<=Line_Number+1;
+					elsif FVAL='0' and FVAL_Previous='1' then -- HVal Falling
+						State<=Idle_Frame;
+					else
+						if Line_Number mod 2=0 then--Line Even
+							if Pixel_Number mod 2=0 then-- Even pixel so red1 or green2
+								Convert_Pixel:=(unsigned(Data_Camera)*32/4096);
+								Storage_Pixel:=std_logic_vector(Convert_Pixel(4 downto 0));
+								Pixel_Value_Even<=Storage_Pixel;
+								Write_Req_FIFO_Store_Line<='0';-- Concatenate pixels in 16 bits  + Send them to fifo_tmp
+							else -- Odd Pixel so green1 or blue 1e
+								Data_Write_FIFO_Store_Line(15 downto 11)<=Pixel_Value_Even;
+								Data_Write_FIFO_Store_Line(10 )<='0';
+								Convert_Pixel:=(unsigned(Data_Camera)*32/4096);
+								Storage_Pixel:=std_logic_vector(Convert_Pixel(4 downto 0));
+								Data_Write_FIFO_Store_Line(9 downto 5 )<=Storage_Pixel;
+								Data_Write_FIFO_Store_Line(4 downto 0 )<=(others => '0');
+								Write_Req_FIFO_Store_Line<='1';-- Concatenate pixels in 16 bits  + Send them to fifo_tmp
+							end if;
+						else -- Line odd
+							if Pixel_Number mod 2=0 then-- Even pixel so red1 or green2
+								Pixel_Value_Even<=std_logic_vector(resize(unsigned(Data_Camera),5));--*32/4096,5));
+								Read_Req_FIFO_Store_Line<='1';--Ask value to the fifo_tmp
+							else -- Odd Pixel so green1 or blue 1
+								Read_Req_FIFO_Store_Line<='0';-- Collect from Fifo, concatenate the last pixels and send it to the FIFO_CLOCK_Interface
+								Out_Pixel(15 downto 11)<=Data_Read_FIFO_Store_Line(15 downto 11);--Pixel Red
+								Out_Pixel(10 downto 5 )<=std_logic_vector((unsigned(Pixel_Value_Even)+unsigned(Data_Read_FIFO_Store_Line(10 downto 5))));--Sum of two green pixels
+								Convert_Pixel:=(unsigned(Data_Camera)*32/4096);
+								Storage_Pixel:=std_logic_vector(Convert_Pixel(4 downto 0));
+								Out_Pixel(4 downto 0 )<=Storage_Pixel;--Pixel Blue 
+								Pixel_Valid_Out<='1';
+							end if;
+						end if;
+						Pixel_Number<=Pixel_Number+1;
+					end if;
+				end case;
+		end if;
+	End Process Camera_Acq;
+
+End Comp; 

@@ -1,0 +1,18 @@
+C:/Users/Guilhem/Lab4.0_Camera/hw/quartus/FIFO_Store_Line.vhd {1 {vcom -work Acquisition_Module -2002 -explicit -stats=none C:/Users/Guilhem/Lab4.0_Camera/hw/quartus/FIFO_Store_Line.vhd
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Compiling entity FIFO_Store_Line
+-- Compiling architecture SYN of fifo_store_line
+
+} {} {}} C:/Users/Guilhem/Lab4.0_Camera/hw/hdl/Acquisition_module.vht {1 {vcom -work Acquisition_Module -2002 -explicit -stats=none C:/Users/Guilhem/Lab4.0_Camera/hw/hdl/Acquisition_module.vht
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Compiling entity Acquisition_module_vhd_tst
+-- Compiling architecture Acquisition_module_arch of Acquisition_module_vhd_tst
+
+} {} {}}

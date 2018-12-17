@@ -1,0 +1,37 @@
+C:/Users/Guilhem/Lab4.0_Camera/hw/quartus/FIFO_Store_Line.vhd {1 {vcom -work work -2002 -explicit -stats=none C:/Users/Guilhem/Lab4.0_Camera/hw/quartus/FIFO_Store_Line.vhd
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Compiling entity FIFO_Store_Line
+-- Compiling architecture SYN of fifo_store_line
+
+} {} {}} C:/Users/Guilhem/Lab4.0_Camera/hw/quartus/FIFO_Inter_Clock_Domain.vhd {1 {vcom -work work -2002 -explicit -stats=none C:/Users/Guilhem/Lab4.0_Camera/hw/quartus/FIFO_Inter_Clock_Domain.vhd
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Compiling entity FIFO_Inter_Clock_Domain
+-- Compiling architecture SYN of fifo_inter_clock_domain
+
+} {} {}} C:/Users/Guilhem/Lab4.0_Camera/hw/quartus/FIFO_Master_Interface_Avalon_Bus.vhd {1 {vcom -work work -2002 -explicit -stats=none C:/Users/Guilhem/Lab4.0_Camera/hw/quartus/FIFO_Master_Interface_Avalon_Bus.vhd
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Compiling entity FIFO_Master_Interface_Avalon_Bus
+-- Compiling architecture SYN of fifo_master_interface_avalon_bus
+
+} {} {}} C:/Users/Guilhem/Lab4.0_Camera/hw/hdl/Top_Level.vht {2 {vcom -work work -2002 -explicit -stats=none C:/Users/Guilhem/Lab4.0_Camera/hw/hdl/Top_Level.vht
+Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Loading package NUMERIC_STD
+-- Compiling entity Top_Level_vhd_tst
+-- Compiling architecture Top_Level_arch of Top_Level_vhd_tst
+** Warning: C:/Users/Guilhem/Lab4.0_Camera/hw/hdl/Top_Level.vht(204): (vcom-1207) An abstract literal and an identifier must have a separator between them.
+** Warning: C:/Users/Guilhem/Lab4.0_Camera/hw/hdl/Top_Level.vht(206): (vcom-1207) An abstract literal and an identifier must have a separator between them.
+** Warning: C:/Users/Guilhem/Lab4.0_Camera/hw/hdl/Top_Level.vht(208): (vcom-1207) An abstract literal and an identifier must have a separator between them.
+
+} {} {}}
