@@ -22,7 +22,7 @@ End Slave_Interface;
 ARCHITECTURE comp OF Slave_Interface IS
 	signal iRegCamAddr     : std_logic_vector(31 DOWNTO 0);
 	signal iRegCamLength   : std_logic_vector(31 DOWNTO 0);
-	signal iRegCamStart    : std_logic;
+	signal iRegCamStart    : std_logic:='0';
 	signal iRegCamSnapshot : std_logic;
 	signal iRegCamFlag     : std_logic_vector(31 DOWNTO 0);
 

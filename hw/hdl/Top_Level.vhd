@@ -49,7 +49,7 @@ Architecture Comp of Top_Level is
 	signal Combination_Signal  : STD_LOGIC:='0';
 	signal Length_Frame_Interconnect : STD_LOGIC_VECTOR(31 DOWNTO 0); 
 	SIGNAL FIFO_Flush_Signal: STD_LOGIC;
-	SIGNAL Clock_Invertion_Camera  : STD_LOGIC;
+	SIGNAL Clock_Camera_PLL  : STD_LOGIC;
 
 	COMPONENT Master_Interface
 		PORT(
@@ -69,7 +69,6 @@ Architecture Comp of Top_Level is
 			FIFO_Data_Available : IN  STD_LOGIC;
 			FIFO_Read_Data      : IN  STD_LOGIC_VECTOR(31 DOWNTO 0);
 			FIFO_Read_Request   : OUT STD_LOGIC;
-			FIFO_Flush_Signal   : OUT STD_LOGIC;
 			Ready               : IN  STD_LOGIC;
 			Reset_n             : IN  STD_LOGIC
 		);
@@ -111,6 +110,7 @@ Architecture Comp of Top_Level is
 		PORT(
 			Clk             : IN  STD_LOGIC;
 			Data_Camera     : IN  STD_LOGIC_VECTOR(11 DOWNTO 0);
+			Ready				 : IN  STD_LOGIC;
 			FVAL            : IN  STD_LOGIC;
 			LVAL            : IN  STD_LOGIC;
 			Out_Pixel       : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -131,10 +131,24 @@ Architecture Comp of Top_Level is
 			wrfull  : OUT STD_LOGIC
 		);
 	end component;
+	component PLL_Camera is
+	port (
+		refclk   : in  std_logic := '0'; --  refclk.clk
+		rst      : in  std_logic := '0'; --   reset.reset
+		outclk_0 : out std_logic         -- outclk0.clk
+	);
+	end component;
 Signal INTERCONNECT : STD_LOGIC_VECTOR(31 downto 0);
 BEGIN
-Clock_Invertion_Camera<= Clk_Camera;
+
 	Reset_H <= not (Reset_n);
+	FIFO_Flush_Signal<= not (Ready);
+	PLL_Camera_inst : PLL_Camera
+		PORT MAP (
+		refclk  => Clk_Camera,
+		rst     => Reset_H,
+		outclk_0 => Clock_Camera_PLL
+		);
 	
 	Master_Interface_inst : Master_Interface
 		PORT MAP(
@@ -155,7 +169,6 @@ Clock_Invertion_Camera<= Clk_Camera;
 			FIFO_Data_Available => FIFO_Data_Available,
 			FIFO_Read_Data      => FIFO_Read_Data,
 			FIFO_Read_Request   => FIFO_Master_Interface_Read_Request,
-			FIFO_Flush_Signal	=> FIFO_Flush_Signal,
 			Ready               => Ready,
 			Reset_n             => Reset_n
 		);
@@ -177,7 +190,7 @@ Clock_Invertion_Camera<= Clk_Camera;
 		);
 	FIFO_Master_Interface_Avalon_Bus_inst : FIFO_Master_Interface_Avalon_Bus
 		PORT MAP(
-			aclr         => Reset_H,
+			aclr         => Reset_H or FIFO_Flush_Signal,
 			clock        => Clk_FPGA,
 			data         => Output_Camera_2Pixels_32Bits,
 			rdreq        => FIFO_Master_Interface_Read_Request,
@@ -191,8 +204,9 @@ Clock_Invertion_Camera<= Clk_Camera;
 		);
 	Acquisition_module_inst : Acquisition_module
 		PORT MAP(
-			Clk             => Clk_Camera,
+			Clk             => Clock_Camera_PLL,
 			Data_Camera     => Data_Camera,
+			Ready 			 => Ready,
 			FVAL            => FVAL,
 			LVAL            => LVAL,
 			Out_Pixel       => Out_Pixel,
@@ -203,11 +217,11 @@ Clock_Invertion_Camera<= Clk_Camera;
 	INTERCONNECT<=Address;
 	FIFO_Inter_Clock_Domain_inst : FIFO_Inter_Clock_Domain
 		PORT MAP(
-			aclr    => Reset_H,
+			aclr    => Reset_H or FIFO_Flush_Signal,
 			data    => Out_Pixel,
 			rdclk   => Clk_FPGA,
 			rdreq   => rdreq_FIFO_Inter_Clock_Domain,
-			wrclk   => Clock_Invertion_Camera,
+			wrclk   => Clock_Camera_PLL,
 			wrreq   => wrreq_FIFO_Inter_Clock_Domain,
 			q       => Output_Camera_2Pixels_32Bits,
 			rdempty => rdempty_FIFO_Inter_Clock_Domain,

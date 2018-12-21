@@ -13,7 +13,6 @@ Port(
  FIFO_Data_Available: IN STD_LOGIC ;
  FIFO_Read_Request : OUT STD_LOGIC ;
  FIFO_Read_Data : IN STD_LOGIC_VECTOR(31 downto 0) ; 
- FIFO_Flush_Signal   : OUT STD_LOGIC;
 -- Avalon Master :
  AM_readdatavalid: IN STD_LOGIC;
  AM_beginbursttransfer: OUT STD_LOGIC ;
@@ -56,7 +55,6 @@ Begin
  			AM_Read<='0';
  			AM_DataWrite<=(others=>'0');
  			AM_BurstCount<=(others=>'0');
- 			FIFO_Flush_Signal<='1';
  			State<=IDLE_FOR_READY;
 		 elsif rising_edge(Clk) then
 			case State is
@@ -64,7 +62,6 @@ Begin
 				AM_Write<='0';
 				AM_BurstCount<="0000";
 					if Ready='1' then
-						FIFO_Flush_Signal<='0';
 						State<=IDLE_FOR_DATA;
 						Indice_Array_DMA<="00000";
 						Indice_Array_FIFO<="00000";
@@ -76,14 +73,16 @@ Begin
 							
 						end if;
 					else
-						FIFO_Flush_Signal<='1';
 						Copy_Address<=(others=>'0');
 						Offset_Address<=(others=>'0');
 					end if;
 				when IDLE_FOR_DATA =>
-					if FIFO_Data_Available='0' then
+					if FIFO_Data_Available='0' and Ready='1' then
 						FIFO_Read_Request<='1';
 						State<=CLOCK_WAIT_DATA_FIFO;
+					elsif Ready='0' then
+						State<=IDLE_FOR_READY;
+						
 					end if;
 				when CLOCK_WAIT_DATA_FIFO=>
 					State<=Collect_Data_FIFO;
@@ -102,10 +101,10 @@ Begin
 					AM_BurstCount<="1000";
 					AM_ByteEnable<="1111";
 					AM_DataWrite<=DATA_Array(0);
-					AM_beginbursttransfer<='1';
+					--AM_beginbursttransfer<='1';
 					State<=DMA_Send_Loop;
 				when DMA_Send_Loop =>
-					AM_beginbursttransfer<='0';
+					--AM_beginbursttransfer<='0';
 					if AM_WaitRequest='0' then
 						AM_DataWrite<=DATA_Array(to_integer(Indice_Array_DMA+1));
 						if Indice_Array_DMA<6 then

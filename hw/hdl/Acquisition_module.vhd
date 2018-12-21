@@ -7,7 +7,7 @@ Entity Acquisition_module is
 Port(
  Clk : IN STD_LOGIC ;
  Reset_n : IN STD_LOGIC ;
-
+ Ready : IN STD_LOGIC;
 -- Avalon Slave :
  FVAL : IN STD_LOGIC;
  LVAL : IN STD_LOGIC ;
@@ -87,7 +87,7 @@ Begin
 			Pixel_Valid_Out<='0';
 			case State is
 				when Idle_Frame =>
-					if FVAL='1' and FVAL_Previous='0' then --Rising edge of FVAL 
+					if FVAL='1' and FVAL_Previous='0' and Ready='1' then --Rising edge of FVAL 
 						State<=Idle_Line;
 					end if;
 					Pixel_Number<=0;

@@ -59,9 +59,9 @@ entity DE0_Nano_SoC_TRDB_D5M_LT24_top_level is
         GPIO_0_LT24_WR_N         : out std_logic;
 
         -- GPIO_1
-        GPIO_1_D5M_D       : out    std_logic_vector(11 downto 0);--To change
-        GPIO_1_D5M_FVAL    : out   std_logic;--To change
-        GPIO_1_D5M_LVAL    : out   std_logic;--To change
+        GPIO_1_D5M_D       : in    std_logic_vector(11 downto 0);--To change
+        GPIO_1_D5M_FVAL    : in   std_logic;--To change
+        GPIO_1_D5M_LVAL    : in   std_logic;--To change
         GPIO_1_D5M_PIXCLK  : in    std_logic;
         GPIO_1_D5M_RESET_N : out   std_logic;
         GPIO_1_D5M_SCLK    : inout std_logic;
@@ -206,6 +206,7 @@ architecture rtl of DE0_Nano_SoC_TRDB_D5M_LT24_top_level is
 		);
 	end component soc_system;
 SIGNAL cmos_sensor_data: STD_LOGIC_VECTOR(11 downto 0);
+SIGNAL Clock_Camera: STD_LOGIC;
 SIGNAL cmos_sensor_frame_valid,cmos_sensor_line_valid : STD_LOGIC;
 SIGNAL CONNECTED_TO_i2c_0_i2c_sda : STD_LOGIC;
 SIGNAL CONNECTED_TO_i2c_0_i2c_scl : STD_LOGIC;
@@ -214,7 +215,7 @@ begin
 	 u0 : component soc_system
 		port map (
 		  clk_clk                             => FPGA_CLK1_50,
-        reset_reset_n                       => '1',
+        reset_reset_n                       => KEY_N(0),
         hps_0_ddr_mem_a                     => HPS_DDR3_ADDR,
         hps_0_ddr_mem_ba                    => HPS_DDR3_BA,
         hps_0_ddr_mem_ck                    => HPS_DDR3_CK_P,
@@ -279,23 +280,28 @@ begin
         hps_0_io_hps_io_gpio_inst_GPIO53    => HPS_LED,
         hps_0_io_hps_io_gpio_inst_GPIO54    => HPS_KEY_N,
         hps_0_io_hps_io_gpio_inst_GPIO61    => HPS_GSENSOR_INT,
-        pio_leds_external_connection_export => LED,
-		  i2c_0_i2c_scl                                          => CONNECTED_TO_i2c_0_i2c_scl,                                          --                                  i2c_0_i2c.scl
-		  i2c_0_i2c_sda                                          => CONNECTED_TO_i2c_0_i2c_sda,                                          --     
-		  cmos_sensor_output_generator_0_cmos_sensor_frame_valid => cmos_sensor_frame_valid, -- cmos_sensor_output_generator_0_cmos_sensor.frame_valid
-		  cmos_sensor_output_generator_0_cmos_sensor_line_valid  => cmos_sensor_line_valid,  --                                           .line_valid
-		  cmos_sensor_output_generator_0_cmos_sensor_data        => cmos_sensor_data,        --                                           .data
+        pio_leds_external_connection_export => open,--LED,
+		  i2c_0_i2c_scl                                          => GPIO_1_D5M_SCLK,                                          --                                  i2c_0_i2c.scl
+		  i2c_0_i2c_sda                                          => GPIO_1_D5M_SDATA,                                          --     
+		  cmos_sensor_output_generator_0_cmos_sensor_frame_valid => open, -- cmos_sensor_output_generator_0_cmos_sensor.frame_valid
+		  cmos_sensor_output_generator_0_cmos_sensor_line_valid  => open,  --                                           .line_valid
+		  cmos_sensor_output_generator_0_cmos_sensor_data        => open,        --                                           .data
 		  camera_module_0_conduit_end_data_sensors_camera        => cmos_sensor_data, 		  
 		  camera_module_0_conduit_end_input_fval                 => cmos_sensor_frame_valid,                 --                                           .input_fval
 		  camera_module_0_conduit_end_input_lval                 => cmos_sensor_line_valid,                 --                                           .input_lval
 		  camera_module_0_conduit_end_debug                      => CONNECTED_TO_camera_module_0_conduit_end_debug,
-		  camera_module_0_clock_sink_2_clk                       => FPGA_CLK1_50                        --               camera_module_0_clock_sink_1.clk
+		  camera_module_0_clock_sink_2_clk                       => Clock_Camera                        --               camera_module_0_clock_sink_1.clk
 			
 		);
-		GPIO_1_D5M_D<=CONNECTED_TO_camera_module_0_conduit_end_debug(11 downto 0);
-			GPIO_1_D5M_FVAL<=cmos_sensor_frame_valid;
-			GPIO_1_D5M_LVAL<=cmos_sensor_line_valid;
-			GPIO_1_D5M_XCLKIN<=FPGA_CLK1_50;
-
-
+		cmos_sensor_data<= GPIO_1_D5M_D;
+		cmos_sensor_frame_valid<=GPIO_1_D5M_FVAL;
+		cmos_sensor_line_valid <=GPIO_1_D5M_LVAL;
+		--Clock_Camera<=FPGA_CLK1_50;
+		Clock_Camera<=GPIO_1_D5M_PIXCLK;
+		GPIO_1_D5M_XCLKIN<= FPGA_CLK1_50;
+		GPIO_1_D5M_RESET_N<= (KEY_N(0));
+		GPIO_1_D5M_TRIGGER <=not(KEY_N(1));
+		LED(0) <=not(KEY_N(0));
+		LED(1) <=not(KEY_N(1));
+		  
 end;
