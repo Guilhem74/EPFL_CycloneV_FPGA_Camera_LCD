@@ -74,6 +74,8 @@ Begin
 			Line_Number<=0;
 			Pixel_Valid_Out<='0';
 			Out_Pixel<=(others=>'0');
+			FVAL_Previous<='1';
+			LVAL_Previous<='1';
 			Pixel_Value_Even<=(others=>'0');
 		elsif falling_edge(Clk) then
 			FVAL_Previous<=FVAL;
@@ -99,7 +101,7 @@ Begin
 					Pixel_Value_Even<=(others => '0');
 					if LVAL='1' and LVAL_Previous='0' then --Rising edge of LVAL and read the first pixel
 						State<=Getting_Pixels;
-						Convert_Pixel:=(unsigned(Data_Camera)*32/4096);
+						Convert_Pixel:=(unsigned(Data_Camera)*31/4095);
 						Storage_Pixel:=std_logic_vector(Convert_Pixel(4 downto 0));
 						Pixel_Value_Even<=Storage_Pixel;
 						Pixel_Number<=1;
@@ -114,7 +116,7 @@ Begin
 					elsif FVAL='0' and FVAL_Previous='1' then -- HVal Falling
 						State<=Idle_Frame;
 					else
-						Convert_Pixel:=(unsigned(Data_Camera)*32/4096);
+						Convert_Pixel:=(unsigned(Data_Camera)*31/4095);
 						Storage_Pixel:=std_logic_vector(Convert_Pixel(4 downto 0));
 						if Line_Number mod 2=0 then--Line Even
 							if Pixel_Number mod 2=0 then-- Even pixel so red1 or green2
@@ -135,7 +137,7 @@ Begin
 							else -- Odd Pixel so green1 or blue 1
 								Read_Req_FIFO_Store_Line<='0';-- Collect from Fifo, concatenate the last pixels and send it to the FIFO_CLOCK_Interface
 								Out_Pixel(15 downto 11)<=Data_Read_FIFO_Store_Line(15 downto 11);--Pixel Red
-								Out_Pixel(10 downto 5 )<=std_logic_vector((unsigned(Pixel_Value_Even)+unsigned(Data_Read_FIFO_Store_Line(10 downto 5))));--Sum of two green pixels
+								Out_Pixel(10 downto 5 )<='0' & std_logic_vector((unsigned(Pixel_Value_Even)));--+unsigned(Data_Read_FIFO_Store_Line(10 downto 5))));--Sum of two green pixels
 								Out_Pixel(4 downto 0 )<=Storage_Pixel;--Pixel Blue 
 								Pixel_Valid_Out<='1';
 							end if;
@@ -143,6 +145,9 @@ Begin
 						Pixel_Number<=Pixel_Number+1;
 					end if;
 				end case;
+				if Ready='0' then
+					State<= Idle_Frame;
+				end if;
 		end if;
 	End Process Camera_Acq;
 
