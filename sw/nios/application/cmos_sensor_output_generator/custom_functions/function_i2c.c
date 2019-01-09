@@ -1,8 +1,9 @@
 #include "../custom_functions/function_i2c.h"
+#include "system.h"
 #define I2C_FREQ              (50000000) /* Clock frequency driving the i2c core: 50 MHz in this example (ADAPT TO YOUR DESIGN) */
 #define TRDB_D5M_I2C_ADDRESS  (0xba)
 
-#define TRDB_D5M_0_I2C_0_BASE (0x1000080c)   /* i2c base address from system.h (ADAPT TO YOUR DESIGN) */
+#define TRDB_D5M_0_I2C_0_BASE I2C_0_BASE   /* i2c base address from system.h (ADAPT TO YOUR DESIGN) */
 i2c_dev i2c;
 bool trdb_d5m_write(i2c_dev *i2c, uint8_t register_offset, uint16_t data) {
     uint8_t byte_data[2] = {(data >> 8) & 0xff, data & 0xff};
@@ -68,15 +69,19 @@ bool Camera_Configuration()
     uint16_t data=0;
     trdb_d5m_read(&i2c, 0, &data);
     printf("Camera version :  %d\r\n",data);
-    success &= Write_and_Read_I2C(&i2c,TRDB_D5M_COLUMN_SIZE_REG,639);
-    success &= Write_and_Read_I2C(&i2c,TRDB_D5M_ROW_SIZE_REG,479);
-    success &= Write_and_Read_I2C(&i2c,TRDB_D5M_SHUTTER_WIDTH_LOWER_REG,0);
+    success &= Write_and_Read_I2C(&i2c,TRDB_D5M_COLUMN_SIZE_REG,2559);//Resolution for lt24 with binning
+    success &= Write_and_Read_I2C(&i2c,TRDB_D5M_ROW_SIZE_REG,1919);// Resolution for lt24 with binning
+    success &= Write_and_Read_I2C(&i2c,TRDB_D5M_SHUTTER_WIDTH_UPPER_REG,0000);//Control light
+    success &= Write_and_Read_I2C(&i2c,TRDB_D5M_SHUTTER_WIDTH_LOWER_REG,10000);//Control light
+    success &= Write_and_Read_I2C(&i2c,TRDB_D5M_ROW_ADDRESS_MODE_REG,0x0033);//Binning x4
+    success &= Write_and_Read_I2C(&i2c,TRDB_D5M_COLUMN_ADDRESS_MODE_REG,0x0033);//Binning x4
+
+
     /*If Using the pll , clock input 25 Mhz, output 95Mhz
      *success &= Write_and_Read_I2C(&i2c,TRDB_D5M_PLL_CONTROL_REG,0x0003);//Power up and use pll
      *success &= Write_and_Read_I2C(&i2c,TRDB_D5M_PLL_CONFIG_1_REG,0x4C14);//N=10, 0x14, M=76, 0x4C
      *success &= Write_and_Read_I2C(&i2c,TRDB_D5M_PLL_CONFIG_2_REG,0x0002);//P1=2 , 0x02
      */
-
 
 
     if (success  ) {

@@ -8,7 +8,6 @@ Entity Top_Level is
 		Reset_n        : IN  STD_LOGIC;
 		-- Avalon Bus :
 			--Master Part
-			AM_beginbursttransfer: OUT STD_LOGIC ;
 			AM_readdatavalid: IN STD_LOGIC;
 			AM_Adresse     : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 			AM_BurstCount  : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
@@ -30,7 +29,10 @@ Entity Top_Level is
 		FVAL           : IN  STD_LOGIC;
 		LVAL           : IN  STD_LOGIC;
 		Data_Camera    : IN  STD_LOGIC_VECTOR(11 downto 0);
-		Debug    : OUT  STD_LOGIC_VECTOR(31 downto 0)
+		Debug    : OUT  STD_LOGIC_VECTOR(31 downto 0);
+		--LCD Connection
+		Buffer_Saved 		  : OUT STD_LOGIC_VECTOR(1 downto 0) ;
+		Display_Buffer      : IN STD_LOGIC_VECTOR(1 downto 0) 
 	);
 end entity Top_Level;
 Architecture Comp of Top_Level is
@@ -55,7 +57,6 @@ Architecture Comp of Top_Level is
 		PORT(
 			Address             : IN  STD_LOGIC_VECTOR(31 DOWNTO 0);
 			Length_Frame		: IN STD_LOGIC_VECTOR(31 downto 0) ;
-			AM_beginbursttransfer: OUT STD_LOGIC ;
 			AM_Adresse          : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 			AM_BurstCount       : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
 			AM_ByteEnable       : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
@@ -70,6 +71,8 @@ Architecture Comp of Top_Level is
 			FIFO_Read_Data      : IN  STD_LOGIC_VECTOR(31 DOWNTO 0);
 			FIFO_Read_Request   : OUT STD_LOGIC;
 			Ready               : IN  STD_LOGIC;
+			Buffer_Saved 		  : OUT STD_LOGIC_VECTOR(1 downto 0) ;
+			Display_Buffer      : IN STD_LOGIC_VECTOR(1 downto 0) ;
 			Reset_n             : IN  STD_LOGIC
 		);
 	END COMPONENT;
@@ -141,7 +144,7 @@ Architecture Comp of Top_Level is
 Signal INTERCONNECT : STD_LOGIC_VECTOR(31 downto 0);
 BEGIN
 
-	Reset_H <= not (Reset_n);
+	Reset_H <= not (Reset_n) or FIFO_Flush_Signal;
 	FIFO_Flush_Signal<= not (Ready);
 	PLL_Camera_inst : PLL_Camera
 		PORT MAP (
@@ -153,7 +156,6 @@ BEGIN
 	Master_Interface_inst : Master_Interface
 		PORT MAP(
 			-- list connections between master ports and signals
-			AM_beginbursttransfer => AM_beginbursttransfer,
 			Address             => Address,
 			Length_Frame 		=> Length_Frame_Interconnect,
 			AM_readdatavalid    => AM_readdatavalid,
@@ -170,7 +172,10 @@ BEGIN
 			FIFO_Read_Data      => FIFO_Read_Data,
 			FIFO_Read_Request   => FIFO_Master_Interface_Read_Request,
 			Ready               => Ready,
+			Buffer_Saved		  => Buffer_Saved,
+			Display_Buffer		  => Display_Buffer,
 			Reset_n             => Reset_n
+			
 		);
 	Slave_Interface_inst : Slave_Interface
 		PORT MAP(
@@ -190,7 +195,7 @@ BEGIN
 		);
 	FIFO_Master_Interface_Avalon_Bus_inst : FIFO_Master_Interface_Avalon_Bus
 		PORT MAP(
-			aclr         => Reset_H or FIFO_Flush_Signal,
+			aclr         => Reset_H ,
 			clock        => Clk_FPGA,
 			data         => Output_Camera_2Pixels_32Bits,
 			rdreq        => FIFO_Master_Interface_Read_Request,
@@ -217,7 +222,7 @@ BEGIN
 	INTERCONNECT<=Address;
 	FIFO_Inter_Clock_Domain_inst : FIFO_Inter_Clock_Domain
 		PORT MAP(
-			aclr    => Reset_H or FIFO_Flush_Signal,
+			aclr    => Reset_H,
 			data    => Out_Pixel,
 			rdclk   => Clk_FPGA,
 			rdreq   => rdreq_FIFO_Inter_Clock_Domain,

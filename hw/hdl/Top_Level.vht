@@ -59,6 +59,8 @@ SIGNAL Data_Camera : STD_LOGIC_VECTOR(11 DOWNTO 0):="000000000000";
 SIGNAL FVAL : STD_LOGIC;
 SIGNAL LVAL : STD_LOGIC;
 SIGNAL Reset_n : STD_LOGIC;
+SIGNAL		Buffer_Saved 		  :  STD_LOGIC_VECTOR(1 downto 0) :="00";
+SIGNAL		Display_Buffer      :  STD_LOGIC_VECTOR(1 downto 0):="00";
 Component Top_Level is
 	Port(
 		Clk_FPGA       : IN  STD_LOGIC;
@@ -85,7 +87,9 @@ Component Top_Level is
 		Clk_Camera     :     STD_LOGIC;
 		FVAL           : IN  STD_LOGIC;
 		LVAL           : IN  STD_LOGIC;
-		Data_Camera    : IN  STD_LOGIC_VECTOR(11 downto 0)
+		Data_Camera    : IN  STD_LOGIC_VECTOR(11 downto 0);
+		Buffer_Saved 		  : OUT STD_LOGIC_VECTOR(1 downto 0) ;
+		Display_Buffer      : IN STD_LOGIC_VECTOR(1 downto 0) 
 	);
 end component;
 
@@ -113,7 +117,9 @@ BEGIN
 	Clk_Camera=> Clk_Camera,
 	FVAL => FVAL,
 	LVAL => LVAL,
-	Reset_n => Reset_n
+	Reset_n => Reset_n,
+		Buffer_Saved 		  =>Buffer_Saved,
+		Display_Buffer      =>Display_Buffer
 	
 	);
  Clk_FPGA <= not(Clk_FPGA) after CLK_PER/2 when not finished;
@@ -143,7 +149,7 @@ process
 		variable i: integer:=0;
 		variable j: integer:=0;
 
-		variable Size: integer:=64;
+		variable Size: integer:=32;
    begin
 		wait until falling_edge(Clk_Camera);
 		FVAL<='1' after  CLK_Camera_Period/4;

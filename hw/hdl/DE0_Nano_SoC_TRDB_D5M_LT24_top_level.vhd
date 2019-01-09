@@ -198,11 +198,14 @@ architecture rtl of DE0_Nano_SoC_TRDB_D5M_LT24_top_level is
 			cmos_sensor_output_generator_0_cmos_sensor_frame_valid : out   std_logic;                                        -- frame_valid
 			cmos_sensor_output_generator_0_cmos_sensor_line_valid  : out   std_logic;                                        -- line_valid
 			cmos_sensor_output_generator_0_cmos_sensor_data        : out   std_logic_vector(11 downto 0);                    -- data
-			camera_module_0_conduit_end_debug                      : out   std_logic_vector(31 downto 0);                    -- debug
-			camera_module_0_conduit_end_data_sensors_camera          : in    std_logic_vector(11 downto 0) := (others => 'X'); -- writebyteenable_n
-			camera_module_0_conduit_end_input_fval                 : in    std_logic                     := 'X';             -- input_fval
-			camera_module_0_conduit_end_input_lval                 : in    std_logic                     := 'X';             -- input_lval
-			camera_module_0_clock_sink_2_clk                       : in    std_logic                     := 'X'              -- clk
+			camera_module_0_conduit_camera_debug                      : out   std_logic_vector(31 downto 0);                    -- debug
+			camera_module_0_conduit_camera_data_sensors_camera          : in    std_logic_vector(11 downto 0) := (others => 'X'); -- writebyteenable_n
+			camera_module_0_conduit_camera_input_fval                 : in    std_logic                     := 'X';             -- input_fval
+			camera_module_0_conduit_camera_input_lval                 : in    std_logic                     := 'X';             -- input_lval
+			camera_module_0_clock_sink_2_clk                       : in    std_logic                     := 'X';              -- clk
+			camera_module_0_conduit_camera_lcd_buffer_saved        : out   std_logic_vector(1 downto 0);                     --         camera_module_0_conduit_camera_lcd.buffer_saved
+			camera_module_0_conduit_camera_lcd_display_buffer      : in    std_logic_vector(1 downto 0)  := (others => '0') --                                           .display_buffer
+
 		);
 	end component soc_system;
 SIGNAL cmos_sensor_data: STD_LOGIC_VECTOR(11 downto 0);
@@ -286,12 +289,13 @@ begin
 		  cmos_sensor_output_generator_0_cmos_sensor_frame_valid => open, -- cmos_sensor_output_generator_0_cmos_sensor.frame_valid
 		  cmos_sensor_output_generator_0_cmos_sensor_line_valid  => open,  --                                           .line_valid
 		  cmos_sensor_output_generator_0_cmos_sensor_data        => open,        --                                           .data
-		  camera_module_0_conduit_end_data_sensors_camera        => cmos_sensor_data, 		  
-		  camera_module_0_conduit_end_input_fval                 => cmos_sensor_frame_valid,                 --                                           .input_fval
-		  camera_module_0_conduit_end_input_lval                 => cmos_sensor_line_valid,                 --                                           .input_lval
-		  camera_module_0_conduit_end_debug                      => CONNECTED_TO_camera_module_0_conduit_end_debug,
-		  camera_module_0_clock_sink_2_clk                       => Clock_Camera                        --               camera_module_0_clock_sink_1.clk
-			
+		  camera_module_0_conduit_camera_data_sensors_camera        => cmos_sensor_data, 		  
+		  camera_module_0_conduit_camera_input_fval                 => cmos_sensor_frame_valid,                 --                                           .input_fval
+		  camera_module_0_conduit_camera_input_lval                 => cmos_sensor_line_valid,                 --                                           .input_lval
+		  camera_module_0_conduit_camera_debug                      => CONNECTED_TO_camera_module_0_conduit_end_debug,
+		  camera_module_0_clock_sink_2_clk                       => Clock_Camera ,                       --               camera_module_0_clock_sink_1.clk
+			camera_module_0_conduit_camera_lcd_buffer_saved =>LED(1 downto 0),
+			camera_module_0_conduit_camera_lcd_display_buffer =>SW(1 downto 0)
 		);
 		cmos_sensor_data<= GPIO_1_D5M_D;
 		cmos_sensor_frame_valid<=GPIO_1_D5M_FVAL;
@@ -301,7 +305,5 @@ begin
 		GPIO_1_D5M_XCLKIN<= FPGA_CLK1_50;
 		GPIO_1_D5M_RESET_N<= (KEY_N(0));
 		GPIO_1_D5M_TRIGGER <=not(KEY_N(1));
-		LED(0) <=not(KEY_N(0));
-		LED(1) <=not(KEY_N(1));
 		  
 end;

@@ -23,10 +23,6 @@ ARCHITECTURE comp OF Slave_Interface IS
 	signal iRegCamAddr     : std_logic_vector(31 DOWNTO 0);
 	signal iRegCamLength   : std_logic_vector(31 DOWNTO 0);
 	signal iRegCamStart    : std_logic:='0';
-	signal iRegCamSnapshot : std_logic;
-	signal iRegCamFlag     : std_logic_vector(31 DOWNTO 0);
-
-
 BEGIN
 	Start_Signal <= iRegCamStart;
 	CamAddress   <= iRegCamAddr;
@@ -38,8 +34,6 @@ BEGIN
 			iRegCamAddr     <= (others => '0');
 			iRegCamLength   <= (others => '0');
 			iRegCamStart    <= ('0');
-			iRegCamSnapshot <= ('0');
-			iRegCamFlag     <= (others => '0');
 		elsif rising_edge(Clk) then
 			if avs_ChipSelect = '1' and avs_Write = '1' then --   Write cycl
 				case avs_Address(2 downto 0) is
@@ -47,8 +41,6 @@ BEGIN
 					when "001"  => iRegCamLength <= avs_WriteData;
 					when "010"  => iRegCamStart <= avs_WriteData(0);
 					when "011"  => iRegCamStart <= not (avs_WriteData(0));
-					when "100"  => iRegCamSnapshot <= avs_WriteData(0);
-					when "101"  => iRegCamFlag <= avs_WriteData;
 					when others => null;
 				end case;
 			end if;
@@ -68,8 +60,6 @@ BEGIN
 					when "001"  => avs_ReadData <= iRegCamLength;
 					when "010"  => avs_ReadData(0) <= iRegCamStart;
 					when "011"  => avs_ReadData(0) <= not (iRegCamStart);
-					when "100"  => avs_ReadData(0) <= iRegCamSnapshot;
-					when "101"  => avs_ReadData <= iRegCamFlag;
 					when others => null;
 				end case;
 			end if;

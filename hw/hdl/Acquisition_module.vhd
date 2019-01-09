@@ -100,7 +100,7 @@ Begin
 					Pixel_Number<=0;
 					Pixel_Value_Even<=(others => '0');
 					if LVAL='1' and LVAL_Previous='0' then --Rising edge of LVAL and read the first pixel
-						State<=Getting_Pixels;
+						State<=Getting_Pixels;-- Even pixel so Blue or green1
 						Convert_Pixel:=(unsigned(Data_Camera)*31/4095);
 						Storage_Pixel:=std_logic_vector(Convert_Pixel(4 downto 0));
 						Pixel_Value_Even<=Storage_Pixel;
@@ -119,25 +119,25 @@ Begin
 						Convert_Pixel:=(unsigned(Data_Camera)*31/4095);
 						Storage_Pixel:=std_logic_vector(Convert_Pixel(4 downto 0));
 						if Line_Number mod 2=0 then--Line Even
-							if Pixel_Number mod 2=0 then-- Even pixel so red1 or green2
+							if Pixel_Number mod 2=0 then-- Even pixel so green1
 								
 								Pixel_Value_Even<=Storage_Pixel;
 								Write_Req_FIFO_Store_Line<='0';-- Concatenate pixels in 16 bits  + Send them to fifo_tmp
-							else -- Odd Pixel so green1 or blue 1e
-								Data_Write_FIFO_Store_Line(15 downto 11)<=Pixel_Value_Even;
+							else -- Odd Pixel so red
+								Data_Write_FIFO_Store_Line(15 downto 11)<=Storage_Pixel;
 								Data_Write_FIFO_Store_Line(10 )<='0';
-								Data_Write_FIFO_Store_Line(9 downto 5 )<=Storage_Pixel;
+								Data_Write_FIFO_Store_Line(9 downto 5 )<=Pixel_Value_Even;
 								Data_Write_FIFO_Store_Line(4 downto 0 )<=(others => '0');
 								Write_Req_FIFO_Store_Line<='1';-- Concatenate pixels in 16 bits  + Send them to fifo_tmp
 							end if;
 						else -- Line odd
-							if Pixel_Number mod 2=0 then-- Even pixel so red1 or green2
-								Pixel_Value_Even<=Storage_Pixel;--*32/4096,5));
+							if Pixel_Number mod 2=0 then-- Even pixel so Blue 
+								Pixel_Value_Even<=Storage_Pixel;
 								Read_Req_FIFO_Store_Line<='1';--Ask value to the fifo_tmp
-							else -- Odd Pixel so green1 or blue 1
+							else -- Odd Pixel so green 2
 								Read_Req_FIFO_Store_Line<='0';-- Collect from Fifo, concatenate the last pixels and send it to the FIFO_CLOCK_Interface
 								Out_Pixel(15 downto 11)<=Data_Read_FIFO_Store_Line(15 downto 11);--Pixel Red
-								Out_Pixel(10 downto 5 )<='0' & std_logic_vector((unsigned(Pixel_Value_Even)));--+unsigned(Data_Read_FIFO_Store_Line(10 downto 5))));--Sum of two green pixels
+								Out_Pixel(10 downto 5 )<=std_logic_vector((unsigned(Pixel_Value_Even)+unsigned(Data_Read_FIFO_Store_Line(10 downto 5))));----Sum of two green pixels
 								Out_Pixel(4 downto 0 )<=Storage_Pixel;--Pixel Blue 
 								Pixel_Valid_Out<='1';
 							end if;
