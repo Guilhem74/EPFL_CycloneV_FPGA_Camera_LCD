@@ -1,5 +1,8 @@
 -- Slave_Interface.vhd
 -- Author : Pierre Fourcade
+--
+-- Slave Interface entity.
+-- This entity is responsible to communicate with the user and command the other entities of the interface.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -8,7 +11,7 @@ use ieee.numeric_std.all;
 entity Slave_Interface is
 PORT (	clk		: in std_logic;
 			nReset	: in std_logic;
-			
+
 			avs_Address			: in std_logic_vector(2 downto 0);
 			avs_ChipSelect		: in std_logic;
 			avs_Read				: in std_logic;
@@ -40,7 +43,7 @@ architecture behavioral of Slave_Interface is
 	
 	begin
 	
-		Avalon_Write : process(clk, nReset)			-- Process for wirtting the registers that the user can direclty command.
+		Avalon_Write : process(clk, nReset) -- Process for writing the registers that the user can direclty command.
 		
 			begin
 				if nReset = '0' then
@@ -56,7 +59,7 @@ architecture behavioral of Slave_Interface is
 							when others =>	null;
 						end case;
 					end if;
-					if Done_Command_Data = '1' then
+					if Done_Command_Data = '1' then -- Once the task asked is done, RegStateCommandData is reset. Reading it allows then the user to know if he can send a new task.
 						RegStateCommandData <= (others => '0');
 					end if;
 				end if;
@@ -64,10 +67,9 @@ architecture behavioral of Slave_Interface is
 			end process Avalon_Write;
 			
 		
-		Avalon_Read : process(clk)				-- Process to read all the registers of the entity.
+		Avalon_Read : process(clk) -- Process to read the registers of the entity.
 		
-			begin
-					
+			begin	
 				if rising_edge(clk) then
 					avs_ReadData <= (others => '0');
 					if (avs_ChipSelect = '1' and avs_Read = '1') then
@@ -86,7 +88,7 @@ architecture behavioral of Slave_Interface is
 			end process Avalon_Read;
 			
 		
-		Communication : process(clk, nReset)
+		Communication : process(clk, nReset) -- Process to handle all the signals going in and out the entity.
 		
 			begin
 				if nReset = '0' then
@@ -101,7 +103,7 @@ architecture behavioral of Slave_Interface is
 				elsif rising_edge(clk) then
 					Command_Data 			<= RegCommandData;
 					State_Command_Data 	<= RegStateCommandData;
-					if Master_Ready = '1' and RegCommandData = x"002C" and RegStateCommandData = "01" and LCD_Control_Ready = '1' then
+					if Master_Ready = '1' and RegCommandData = x"002C" and RegStateCommandData = "01" and LCD_Control_Ready = '1' then -- Needed conditions to start the Master Interface.
 						Master_Start <= '1';
 					else
 						Master_Start <= '0';
@@ -110,7 +112,7 @@ architecture behavioral of Slave_Interface is
 					LengthBuffer	<= RegLengthBuffer;
 					Display_Buffer <= RegDisplayBuffer;
 					RegBufferSaved <= Buffer_Saved;
-					if Master_Ready = '1' then
+					if Master_Ready = '1' then	-- If the master is available we can change the buffer we want to use.
 						RegDisplayBuffer <= Buffer_Saved;
 					end if;
 					

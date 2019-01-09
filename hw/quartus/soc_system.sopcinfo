@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="soc_system" kind="soc_system" version="1.0" fabric="QSYS">
  <!-- Format version 18.1 625 (Future versions may contain additional information.) -->
- <!-- 2019.01.09.15:59:11 -->
+ <!-- 2019.01.09.22:49:09 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1547045951</value>
+  <value>1547070548</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -2021,30 +2021,6 @@ parameters are a RESULT of the module parameters. -->
     <direction>Output</direction>
     <width>2</width>
     <role>display_buffer</role>
-   </port>
-   <port>
-    <name>Export_Empty_FIFO</name>
-    <direction>Output</direction>
-    <width>1</width>
-    <role>export_empty_fifo</role>
-   </port>
-   <port>
-    <name>Export_Full_FIFO</name>
-    <direction>Output</direction>
-    <width>1</width>
-    <role>export_full_fifo</role>
-   </port>
-   <port>
-    <name>Export_Read</name>
-    <direction>Output</direction>
-    <width>1</width>
-    <role>export_read</role>
-   </port>
-   <port>
-    <name>Export_Waiting</name>
-    <direction>Output</direction>
-    <width>1</width>
-    <role>export_waiting</role>
    </port>
    <port>
     <name>RDX</name>

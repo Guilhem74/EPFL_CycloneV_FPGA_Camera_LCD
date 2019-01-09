@@ -13,7 +13,7 @@
 #include "CMOS_Sensor/cmos_sensor_output_generator_regs.h"
 #include "custom_functions/Memory_Access.h"
 #include "custom_functions/function_i2c.h"
-
+#include "custom_functions/LCD_function.h"
 
 
 

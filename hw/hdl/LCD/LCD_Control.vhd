@@ -1,5 +1,9 @@
 -- LCD_Control.vhd
 -- Author : Pierre Fourcade
+--
+-- LCD Control entity.
+-- LCD Control translates the data or command from the Slave Interface or the FIFO to the LCD.
+-- Once its task is done, it informs the Slave Interface that it is ready for an other task.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -46,12 +50,11 @@ architecture behavioral of LCD_Control is
 	
 	begin
 	
-		Word_Count <= to_integer(unsigned(Read_FIFO_Word));
+		Word_Count <= to_integer(unsigned(Read_FIFO_Word)); -- Not used here.
 	
-		Next_State_Logic : process(state_reg, Command_Data, State_Command_Data, Master_Ready, counter_word_reg, Waiting_Space, Empty_FIFO, Done_Command, Done_Data, Done_Display, Word_Count)
+		Next_State_Logic : process(state_reg, Command_Data, State_Command_Data, Master_Ready, counter_word_reg, Waiting_Space, Empty_FIFO, Done_Command, Done_Data, Done_Display)
 		
 			begin
-				
 				state_next <= state_reg;
 				case state_reg is
 					when Init 					=> if State_Command_Data = "01" then
@@ -74,41 +77,37 @@ architecture behavioral of LCD_Control is
 															state_next <= End_Command_Data;
 														end if;
 					
-					when Check_Full_FIFO		=> if Master_Ready = '1' then
-															if Empty_FIFO = '1' then
+					when Check_Full_FIFO		=> if Master_Ready = '1' then -- If the Master retrieved all the pixel data.
+															if Empty_FIFO = '1' then 
 																state_next <= End_Display;
 															else
 																state_next <= Display;
 															end if;
 														else
-															if Waiting_Space = '1' then
+															if Waiting_Space = '1' then -- If the FIFO is full.
 																state_next <= Check_16_FIFO;
 															end if;
 														end if;
 					
-					when Display 				=> if Done_Display = '1' then
-															if Master_Ready = '1' then
-																state_next <= Check_Full_FIFO;
-															else
-																state_next <= Check_16_FIFO;
-															end if;
+					when Display 				=> if Done_Display = '1' then -- Empty the FIFO.
+															state_next <= Check_Full_FIFO;
 														end if;
 					
-					when Check_16_FIFO		=>	if Waiting_Space = '0' then
+					when Check_16_FIFO		=>	if Waiting_Space = '0' then -- If the FIFO is being filled.
 															state_next <= Check_Full_FIFO;
 														else
 															state_next <= Display_16;
 														end if;
 					
-					when Display_16			=> if Done_Display = '1' then
+					when Display_16			=> if Done_Display = '1' then -- Read 16 words of 32 bits.
 															state_next <= Check_16_FIFO;
 														end if;
 					
-					when End_Display			=> if Done_Command = '1' then
+					when End_Display			=> if Done_Command = '1' then -- Corresponds to writing the command 0. Ensures the end of the write command.
 															state_next <= End_Command_Data;
 														end if;
 	
-					when End_Command_Data	=> if State_Command_Data = "00" then
+					when End_Command_Data	=> if State_Command_Data = "00" then -- The Slave Interface has correctly received that the task was done.
 															state_next <= Init;
 														end if;
 												
@@ -116,13 +115,11 @@ architecture behavioral of LCD_Control is
 				end case;
 				
 			end process Next_State_Logic;
-					
-					
+									
 					
 		Register_Logic : process(clk, nReset)
 		
 			begin
-			
 				if nReset = '0' then
 					state_reg <= Init;
 					counter_time_reg <= 0;
@@ -133,127 +130,126 @@ architecture behavioral of LCD_Control is
 					counter_word_reg <= counter_word_next;
 				end if;
 				
-			end process Register_Logic;
-				
+			end process Register_Logic;			
 				
 				
 		Combinational_Logic : process(state_reg, Command_Data, Read_FIFO_Data, counter_time_reg, counter_word_reg, Empty_FIFO, Master_Ready)
 		
 			begin
 				
-				CSX 							<= '1';
-				D_CX 							<= '1';
-				WRX 							<= '1';
-				RDX 							<= '1';
-				D 								<= (others => '0');
-				Read_FIFO 					<= '0';
-				Read_16_Words 				<= '0';
-				LCD_Control_Ready 		<=	'0';
-				Done_Command_Data			<= '0';
-				Done_Command				<= '0';
-				Done_Data					<= '0';
-				Done_Display				<= '0';
-				counter_time_next 		<= counter_time_reg;
-				counter_word_next			<= counter_word_reg;
+				CSX 						<= '1';
+				D_CX 						<= '1';
+				WRX 						<= '1';
+				RDX 						<= '1';
+				D 							<= (others => '0');
+				Read_FIFO 				<= '0';
+				Read_16_Words 			<= '0';
+				LCD_Control_Ready 	<=	'0';
+				Done_Command_Data		<= '0';
+				Done_Command			<= '0';
+				Done_Data				<= '0';
+				Done_Display			<= '0';
+				counter_time_next 	<= counter_time_reg;
+				counter_word_next		<= counter_word_reg;
 				case state_reg is 
-					when Init 		=> counter_time_next <= 0;
-											counter_word_next <= 0;
-											LCD_Control_Ready <=	'1';
+					when Init 				=> counter_time_next <= 0;
+													counter_word_next <= 0;
+													LCD_Control_Ready <=	'1';
 										
-					when Command 	=>	if counter_time_reg = 8 then
-												Done_Command 		<= '1';
-												counter_time_next <= 0;
-											else
-												CSX 	<= '0';
-												D_CX 	<= '0';
-												D 		<= Command_Data;
-												if counter_time_reg < 5 then
-													WRX <= '0';	
-												else
-													WRX <= '1';
-												end if;
-												counter_time_next <= counter_time_reg + 1;
-											end if;
+					when Command 			=>	if counter_time_reg = 8 then
+														Done_Command 		<= '1'; -- Writing the command is done.
+														counter_time_next <= 0;
+													else
+														CSX 	<= '0';
+														D_CX 	<= '0';
+														D 		<= Command_Data;
+														if counter_time_reg < 5 then
+															WRX <= '0';	
+														else
+															WRX <= '1';
+														end if;
+														counter_time_next <= counter_time_reg + 1;
+													end if;
 											
-					when Data 		=> if counter_time_reg = 8 then
-												Done_Data 			<= '1';
-												counter_time_next <= 0;
-											else
-												CSX 	<= '0';
-												D 		<= Command_Data;
-												if counter_time_reg < 5 then
-													WRX <= '0';	
-												else
-													WRX <= '1';
-												end if;
-											counter_time_next <= counter_time_reg + 1;
-											end if;
+					when Data 				=> if counter_time_reg = 8 then
+														Done_Data 			<= '1'; -- Writing the data is done.
+														counter_time_next <= 0;
+													else
+														CSX 	<= '0';
+														D 		<= Command_Data;
+														if counter_time_reg < 5 then
+															WRX <= '0';	
+														else
+															WRX <= '1';
+														end if;
+													counter_time_next <= counter_time_reg + 1;
+													end if;
 
 					when Check_Full_FIFO	=> if Master_Ready = '1' then
 														if Empty_FIFO = '0' then
-															Read_FIFO <= '1';
+															Read_FIFO <= '1'; -- We are going to read in the next state. We need to ask for the data before reading it.
 														end if;
 													end if;
 													counter_word_next <= 0;
 					
-					when Display	=> if counter_time_reg = 8 then
-												Done_Display <= '1';
-												counter_time_next <= 0;
-											else
-												CSX <= '0';
-												D <= Read_FIFO_Data;
-												if counter_time_reg < 5 then
-													WRX <= '0';	
-												else
-													WRX <= '1';
-												end if;
-											counter_time_next <= counter_time_reg + 1;
-											end if;
+					when Display			=> if counter_time_reg = 8 then
+														Done_Display <= '1'; -- Writing the pixel data is done.
+														counter_time_next <= 0;
+													else
+														CSX <= '0';
+														D <= Read_FIFO_Data;
+														if counter_time_reg < 5 then
+															WRX <= '0';	
+														else
+															WRX <= '1';
+														end if;
+													counter_time_next <= counter_time_reg + 1;
+													end if;
 					
 					when Check_16_FIFO 	=> if counter_word_reg = 31 then
-														Read_16_Words <= '1';
+														Read_16_Words <= '1'; -- 16 words have been read, the Master Interface can fill the FIFO.
 														counter_word_next <= 0;
+														Read_FIFO <= '0';
 													else
-														Read_FIFO <= '1';
+														Read_FIFO <= '1'; -- We ask for an other pixel data to read.
 													end if;
 													
-					when Display_16	=> if counter_time_reg = 8 then
-													Done_Display <= '1';
-													counter_time_next <= 0;
-													counter_word_next <= counter_word_reg + 1;
-												else
-													CSX <= '0';
-													D <= Read_FIFO_Data;
-													if counter_time_reg < 5 then
-														WRX <= '0';	
+					when Display_16		=> if counter_time_reg = 8 then
+														Done_Display <= '1';
+														counter_time_next <= 0;
+														counter_word_next <= counter_word_reg + 1; -- Only difference with the Display state. We count the number of pixel data we have read.
 													else
-														WRX <= '1';
-													end if;
-												counter_time_next <= counter_time_reg + 1;
-												end if;
-					
-					when End_Display 	=> if counter_time_reg = 8 then
-													Done_Command 		<= '1';
-													counter_time_next <= 0;
-												else
-													CSX 	<= '0';
-													D_CX 	<= '0';
-													D 		<= x"0000";
-													if counter_time_reg < 5 then
-														WRX <= '0';	
-													else
-														WRX <= '1';
-													end if;
+														CSX <= '0';
+														D <= Read_FIFO_Data;
+														if counter_time_reg < 5 then
+															WRX <= '0';	
+														else
+															WRX <= '1';
+														end if;
 													counter_time_next <= counter_time_reg + 1;
-												end if;
+													end if;
 					
-					when End_Command_Data	=> Done_Command_Data <= '1';
+					when End_Display 		=> if counter_time_reg = 8 then
+														Done_Command 		<= '1';
+														counter_time_next <= 0;
+													else
+														CSX 	<= '0';
+														D_CX 	<= '0';
+														D 		<= x"0000";
+														if counter_time_reg < 5 then
+															WRX <= '0';	
+														else
+															WRX <= '1';
+														end if;
+														counter_time_next <= counter_time_reg + 1;
+													end if;
+					
+					when End_Command_Data=> Done_Command_Data <= '1'; -- Indicates that the task is done.
 											
-					when others 		=> null;
+					when others 			=> null;
 				end case;
 					
 			end process Combinational_Logic;
-
 									
 
 end architecture behavioral;

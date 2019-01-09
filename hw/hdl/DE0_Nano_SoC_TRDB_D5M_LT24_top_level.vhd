@@ -210,10 +210,6 @@ architecture rtl of DE0_Nano_SoC_TRDB_D5M_LT24_top_level is
 			lcd_0_0_conduit_end_d                                  : out   std_logic_vector(15 downto 0);                    -- d
 			lcd_0_0_conduit_end_d_cx                               : out   std_logic;                                        -- d_cx
 			lcd_0_0_conduit_end_display_buffer                     : out   std_logic_vector(1 downto 0);                     -- display_buffer
-			lcd_0_0_conduit_end_export_empty_fifo                  : out   std_logic;                                        -- export_empty_fifo
-			lcd_0_0_conduit_end_export_full_fifo                   : out   std_logic;                                        -- export_full_fifo
-			lcd_0_0_conduit_end_export_read                        : out   std_logic;                                        -- export_read
-			lcd_0_0_conduit_end_export_waiting                     : out   std_logic;                                        -- export_waiting
 			lcd_0_0_conduit_end_rdx                                : out   std_logic;                                        -- rdx
 			lcd_0_0_conduit_end_wrx                                : out   std_logic                                         -- wrx
 		);
@@ -308,10 +304,6 @@ begin
 			lcd_0_0_conduit_end_d                                  => GPIO_0_LT24_D,                                  --                                           .d
 			lcd_0_0_conduit_end_d_cx                               => GPIO_0_LT24_RS,                               --                                           .d_cx
 			lcd_0_0_conduit_end_display_buffer                     => CONNECTED_TO_lcd_0_0_conduit_end_display_buffer,                     --                                           .display_buffer
-			lcd_0_0_conduit_end_export_empty_fifo                  => open,                  --                                           .export_empty_fifo
-			lcd_0_0_conduit_end_export_full_fifo                   => open,                   --                                           .export_full_fifo
-			lcd_0_0_conduit_end_export_read                        => open,                        --                                           .export_read
-			lcd_0_0_conduit_end_export_waiting                     => open,                     --                                           .export_waiting
 			lcd_0_0_conduit_end_rdx                                => GPIO_0_LT24_RD_N,                                --                                           .rdx
 			lcd_0_0_conduit_end_wrx                                => GPIO_0_LT24_WR_N
 		);

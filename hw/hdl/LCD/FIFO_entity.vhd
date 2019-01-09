@@ -1,5 +1,10 @@
 -- FIFO_entity.vhd
 -- Author : Pierre Fourcade
+--
+-- FIFO entity.
+-- This file corresponds to a PORT MAP of the FIFO from the IP catalogue to match our needs.
+-- The input data of the FIFO is 32 bits wide.
+-- The output data of the FIFO is 16 bits wide.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -39,7 +44,7 @@ architecture behavioral of FIFO_entity is
 	
 	begin
 
-		inv_nReset <= not(nReset);
+		inv_nReset <= not(nReset); -- The clear of the FIFO is for 1 so we need to invert our nReset to match them.
 	
 		FIFO : FIFO_intel PORT MAP (	aclr 		=> inv_nReset,
 												data 		=> Write_FIFO_Data,

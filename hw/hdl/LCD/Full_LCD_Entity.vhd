@@ -1,5 +1,8 @@
 -- Full_LCD_Entity.vhd
 -- Author : Pierre Fourcade
+--
+-- LCD Interface entity.
+-- This is the PORT MAP of the elements composing the LCD Interface.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -8,11 +11,6 @@ use ieee.numeric_std.all;
 entity Full_LCD_Entity is
 PORT ( 	clk	 : in std_logic;	
 			nReset : in std_logic;
-			
-			Export_Full_FIFO : out std_logic;
-			Export_Empty_FIFO : out std_logic;
-			Export_Waiting	: out std_logic;
-			Export_Read		: out std_logic;
 			
 			CSX 	: out std_logic;
 			D_CX 	: out std_logic;
@@ -136,27 +134,22 @@ architecture behavioral of Full_LCD_Entity is
 	end component LCD_Control;
 	
 	signal Done_Command_Data_in, LCD_Control_Ready_in 	: std_logic;
-	signal State_Command_Data_in : std_logic_vector(1 downto 0);
-	signal Command_Data_in			: std_logic_vector(15 downto 0);
+	signal State_Command_Data_in 								: std_logic_vector(1 downto 0);
+	signal Command_Data_in										: std_logic_vector(15 downto 0);
 	
 	signal StartAdd_in, LengthBuffer_in			: std_logic_vector(31 downto 0);
 	signal Display_Buffer_in 						: std_logic_vector(1 downto 0);
 	signal Master_Start_in, Master_Ready_in 	: std_logic;
 	signal Read_16_Words_in, Waiting_Space_in : std_logic;
 	
-	signal Write_FIFO_in, Read_FIFO_in, Full_FIFO_in, Empty_FIFO_in : std_logic;
-	signal Write_FIFO_Data_in : std_logic_vector(31 downto 0);
-	signal Read_FIFO_Data_in : std_logic_vector(15 downto 0);
-	signal Write_FIFO_Word_in : std_logic_vector(8 downto 0);
-	signal Read_FIFO_Word_in : std_logic_vector(9 downto 0);
+	signal Write_FIFO_in, Read_FIFO_in 	: std_logic;
+	signal Full_FIFO_in, Empty_FIFO_in 	: std_logic;
+	signal Write_FIFO_Data_in 				: std_logic_vector(31 downto 0);
+	signal Read_FIFO_Data_in 				: std_logic_vector(15 downto 0);
+	signal Write_FIFO_Word_in 				: std_logic_vector(8 downto 0);
+	signal Read_FIFO_Word_in 				: std_logic_vector(9 downto 0);
 	
 	begin
-	
-	Export_Full_FIFO <= Full_FIFO_in;
-	Export_Empty_FIFO <= Empty_FIFO_in;
-	Export_Waiting <= Waiting_Space_in;
-	Export_Read	<= Read_16_Words_in;
-	
 	
 	Display_Buffer <= Display_Buffer_in;
 	
