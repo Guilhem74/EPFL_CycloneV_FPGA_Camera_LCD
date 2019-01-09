@@ -204,16 +204,23 @@ architecture rtl of DE0_Nano_SoC_TRDB_D5M_LT24_top_level is
 			camera_module_0_conduit_camera_input_lval                 : in    std_logic                     := 'X';             -- input_lval
 			camera_module_0_clock_sink_2_clk                       : in    std_logic                     := 'X';              -- clk
 			camera_module_0_conduit_camera_lcd_buffer_saved        : out   std_logic_vector(1 downto 0);                     --         camera_module_0_conduit_camera_lcd.buffer_saved
-			camera_module_0_conduit_camera_lcd_display_buffer      : in    std_logic_vector(1 downto 0)  := (others => '0') --                                           .display_buffer
-
+			camera_module_0_conduit_camera_lcd_display_buffer      : in    std_logic_vector(1 downto 0)  := (others => '0'); --                                           .display_buffer
+			lcd_0_0_conduit_end_buffer_saved                       : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- buffer_saved
+			lcd_0_0_conduit_end_csx                                : out   std_logic;                                        -- csx
+			lcd_0_0_conduit_end_d                                  : out   std_logic_vector(15 downto 0);                    -- d
+			lcd_0_0_conduit_end_d_cx                               : out   std_logic;                                        -- d_cx
+			lcd_0_0_conduit_end_display_buffer                     : out   std_logic_vector(1 downto 0);                     -- display_buffer
+			lcd_0_0_conduit_end_export_empty_fifo                  : out   std_logic;                                        -- export_empty_fifo
+			lcd_0_0_conduit_end_export_full_fifo                   : out   std_logic;                                        -- export_full_fifo
+			lcd_0_0_conduit_end_export_read                        : out   std_logic;                                        -- export_read
+			lcd_0_0_conduit_end_export_waiting                     : out   std_logic;                                        -- export_waiting
+			lcd_0_0_conduit_end_rdx                                : out   std_logic;                                        -- rdx
+			lcd_0_0_conduit_end_wrx                                : out   std_logic                                         -- wrx
 		);
 	end component soc_system;
-SIGNAL cmos_sensor_data: STD_LOGIC_VECTOR(11 downto 0);
-SIGNAL Clock_Camera: STD_LOGIC;
-SIGNAL cmos_sensor_frame_valid,cmos_sensor_line_valid : STD_LOGIC;
-SIGNAL CONNECTED_TO_i2c_0_i2c_sda : STD_LOGIC;
-SIGNAL CONNECTED_TO_i2c_0_i2c_scl : STD_LOGIC;
-SIGNAL CONNECTED_TO_camera_module_0_conduit_end_debug: std_logic_vector(31 downto 0);
+SIGNAL CONNECTED_TO_camera_module_0_conduit_camera_lcd_buffer_saved: std_logic_vector(1 downto 0);
+SIGNAL CONNECTED_TO_lcd_0_0_conduit_end_display_buffer: std_logic_vector(1 downto 0);
+
 begin
 	 u0 : component soc_system
 		port map (
@@ -289,21 +296,29 @@ begin
 		  cmos_sensor_output_generator_0_cmos_sensor_frame_valid => open, -- cmos_sensor_output_generator_0_cmos_sensor.frame_valid
 		  cmos_sensor_output_generator_0_cmos_sensor_line_valid  => open,  --                                           .line_valid
 		  cmos_sensor_output_generator_0_cmos_sensor_data        => open,        --                                           .data
-		  camera_module_0_conduit_camera_data_sensors_camera        => cmos_sensor_data, 		  
-		  camera_module_0_conduit_camera_input_fval                 => cmos_sensor_frame_valid,                 --                                           .input_fval
-		  camera_module_0_conduit_camera_input_lval                 => cmos_sensor_line_valid,                 --                                           .input_lval
-		  camera_module_0_conduit_camera_debug                      => CONNECTED_TO_camera_module_0_conduit_end_debug,
-		  camera_module_0_clock_sink_2_clk                       => Clock_Camera ,                       --               camera_module_0_clock_sink_1.clk
-			camera_module_0_conduit_camera_lcd_buffer_saved =>LED(1 downto 0),
-			camera_module_0_conduit_camera_lcd_display_buffer =>SW(1 downto 0)
+		  camera_module_0_conduit_camera_data_sensors_camera        => GPIO_1_D5M_D, 		  
+		  camera_module_0_conduit_camera_input_fval                 => GPIO_1_D5M_FVAL,                 --                                           .input_fval
+		  camera_module_0_conduit_camera_input_lval                 => GPIO_1_D5M_LVAL,                 --                                           .input_lval
+		  camera_module_0_conduit_camera_debug                      => open,
+		  camera_module_0_clock_sink_2_clk                       => GPIO_1_D5M_PIXCLK ,                       --               camera_module_0_clock_sink_1.clk
+		  camera_module_0_conduit_camera_lcd_buffer_saved =>CONNECTED_TO_camera_module_0_conduit_camera_lcd_buffer_saved,
+		  camera_module_0_conduit_camera_lcd_display_buffer =>CONNECTED_TO_lcd_0_0_conduit_end_display_buffer,
+			lcd_0_0_conduit_end_buffer_saved                       => CONNECTED_TO_camera_module_0_conduit_camera_lcd_buffer_saved,                       --                        lcd_0_0_conduit_end.buffer_saved
+			lcd_0_0_conduit_end_csx                                => GPIO_0_LT24_CS_N,                                --                                           .csx
+			lcd_0_0_conduit_end_d                                  => GPIO_0_LT24_D,                                  --                                           .d
+			lcd_0_0_conduit_end_d_cx                               => GPIO_0_LT24_RS,                               --                                           .d_cx
+			lcd_0_0_conduit_end_display_buffer                     => CONNECTED_TO_lcd_0_0_conduit_end_display_buffer,                     --                                           .display_buffer
+			lcd_0_0_conduit_end_export_empty_fifo                  => open,                  --                                           .export_empty_fifo
+			lcd_0_0_conduit_end_export_full_fifo                   => open,                   --                                           .export_full_fifo
+			lcd_0_0_conduit_end_export_read                        => open,                        --                                           .export_read
+			lcd_0_0_conduit_end_export_waiting                     => open,                     --                                           .export_waiting
+			lcd_0_0_conduit_end_rdx                                => GPIO_0_LT24_RD_N,                                --                                           .rdx
+			lcd_0_0_conduit_end_wrx                                => GPIO_0_LT24_WR_N
 		);
-		cmos_sensor_data<= GPIO_1_D5M_D;
-		cmos_sensor_frame_valid<=GPIO_1_D5M_FVAL;
-		cmos_sensor_line_valid <=GPIO_1_D5M_LVAL;
-		--Clock_Camera<=FPGA_CLK1_50;
-		Clock_Camera<=GPIO_1_D5M_PIXCLK;
+
 		GPIO_1_D5M_XCLKIN<= FPGA_CLK1_50;
 		GPIO_1_D5M_RESET_N<= (KEY_N(0));
 		GPIO_1_D5M_TRIGGER <=not(KEY_N(1));
+		LED(1 downto 0) <= CONNECTED_TO_camera_module_0_conduit_camera_lcd_buffer_saved;
 		  
 end;

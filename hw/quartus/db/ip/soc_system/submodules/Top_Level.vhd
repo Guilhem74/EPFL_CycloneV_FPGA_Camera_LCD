@@ -53,7 +53,7 @@ Architecture Comp of Top_Level is
 	SIGNAL FIFO_Flush_Signal: STD_LOGIC;
 	SIGNAL Clock_Camera_PLL  : STD_LOGIC;
 
-	COMPONENT Master_Interface
+	COMPONENT Camera_Master_Interface
 		PORT(
 			Address             : IN  STD_LOGIC_VECTOR(31 DOWNTO 0);
 			Length_Frame		: IN STD_LOGIC_VECTOR(31 downto 0) ;
@@ -76,7 +76,7 @@ Architecture Comp of Top_Level is
 			Reset_n             : IN  STD_LOGIC
 		);
 	END COMPONENT;
-	COMPONENT Slave_Interface IS
+	COMPONENT Camera_Slave_Interface IS
 		PORT(
 			--   Avalon interfaces signals
 			Clk            : IN  std_logic;
@@ -109,7 +109,7 @@ Architecture Comp of Top_Level is
 			usedw        : OUT STD_LOGIC_VECTOR(4 DOWNTO 0)
 		);
 	END COMPONENT;
-	COMPONENT Acquisition_module        -- Interface capturing the data coming from the camera
+	COMPONENT Camera_Acquisition_module        -- Interface capturing the data coming from the camera
 		PORT(
 			Clk             : IN  STD_LOGIC;
 			Data_Camera     : IN  STD_LOGIC_VECTOR(11 DOWNTO 0);
@@ -153,7 +153,7 @@ BEGIN
 		outclk_0 => Clock_Camera_PLL
 		);
 	
-	Master_Interface_inst : Master_Interface
+	Master_Interface_inst : Camera_Master_Interface
 		PORT MAP(
 			-- list connections between master ports and signals
 			Address             => Address,
@@ -177,7 +177,7 @@ BEGIN
 			Reset_n             => Reset_n
 			
 		);
-	Slave_Interface_inst : Slave_Interface
+	Slave_Interface_inst : Camera_Slave_Interface
 		PORT MAP(
 			--   Avalon interfaces signals
 			Clk             => Clk_FPGA,
@@ -207,7 +207,7 @@ BEGIN
 			q            => FIFO_Read_Data,
 			usedw        => open
 		);
-	Acquisition_module_inst : Acquisition_module
+	Acquisition_module_inst : Camera_Acquisition_module
 		PORT MAP(
 			Clk             => Clock_Camera_PLL,
 			Data_Camera     => Data_Camera,
