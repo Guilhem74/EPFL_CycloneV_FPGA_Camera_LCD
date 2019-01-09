@@ -29,7 +29,7 @@ int Test_Memory_Map()
 	        // Check if read data is equal to written data
 	        assert(writedata == readdata);
 	    }
-	    printf("Memory PASS");
+	    printf("Memory PASS\n");
 	    return EXIT_SUCCESS;
 }
 int Quick_Test_Memory_Map()

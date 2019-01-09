@@ -16,6 +16,14 @@ Modification date : 07/03/2016
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include "system.h"
+#include "sys/alt_stdio.h"
+#include "HAL/inc/io.h"
+#include <string.h>
+#include <math.h>
+#include <stdio.h>
+#include "../Configuration.h"
 
 ///////////////////////
 // GENERAL FUNCTIONS //

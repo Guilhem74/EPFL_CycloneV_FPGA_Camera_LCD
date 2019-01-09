@@ -8,7 +8,10 @@
 #include "HAL/inc/io.h"
 #include <string.h>
 #include <math.h>
+#include <stdio.h>
 #include <assert.h>
+#include "../Configuration.h"
+
 int Test_Memory_Map();
 int Quick_Test_Memory_Map();
 #endif

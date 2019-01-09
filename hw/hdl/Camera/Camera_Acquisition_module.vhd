@@ -62,6 +62,7 @@ Begin
 	Process(Clk, Reset_n)
 		variable Convert_Pixel: unsigned(23 downto 0)  :=(others=>'0');
 		variable Storage_Pixel: STD_LOGIC_VECTOR(4 downto 0):="00000";
+		variable Sum_Pixel: unsigned(5 downto 0):="000000";
 		begin
 		if Reset_n = '0' then
 			Clear_FIFO_Store_Line<='0';
@@ -135,9 +136,10 @@ Begin
 								Pixel_Value_Even<=Storage_Pixel;
 								Read_Req_FIFO_Store_Line<='1';--Ask value to the fifo_tmp
 							else -- Odd Pixel so green 2
-								Read_Req_FIFO_Store_Line<='0';-- Collect from Fifo, concatenate the last pixels and send it to the FIFO_CLOCK_Interface
+								Read_Req_FIFO_Store_Line<='0';-- Collect from Fifo, concatenate the last pixels and sedn it to the FIFO_CLOCK_Interface
 								Out_Pixel(15 downto 11)<=Data_Read_FIFO_Store_Line(15 downto 11);--Pixel Red
-								Out_Pixel(10 downto 5 )<=std_logic_vector((unsigned(Pixel_Value_Even)+unsigned(Data_Read_FIFO_Store_Line(9 downto 5))));----Sum of two green pixels
+								Sum_Pixel:=('0' & unsigned(Pixel_Value_Even))+('0' & unsigned(Data_Read_FIFO_Store_Line(9 downto 5)));
+								Out_Pixel(10 downto 5 )<=std_logic_vector(Sum_Pixel);----Sum of two green pixels
 								Out_Pixel(4 downto 0 )<=Storage_Pixel;--Pixel Blue 
 								Pixel_Valid_Out<='1';
 							end if;
