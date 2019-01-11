@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'soc_system'
  * SOPC Builder design path: C:/Users/Guilhem/Lab4.0_Camera/hw/quartus/soc_system.sopcinfo
  *
- * Generated: Wed Jan 09 15:23:48 CET 2019
+ * Generated: Thu Jan 10 12:53:50 CET 2019
  */
 
 /*
@@ -142,7 +142,7 @@
  */
 
 #define ALT_MODULE_CLASS_Camera_Module_0 Camera_Module
-#define CAMERA_MODULE_0_BASE 0x10000880
+#define CAMERA_MODULE_0_BASE 0x10000860
 #define CAMERA_MODULE_0_IRQ -1
 #define CAMERA_MODULE_0_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define CAMERA_MODULE_0_NAME "/dev/Camera_Module_0"
@@ -157,10 +157,8 @@
 
 #define __ALTERA_AVALON_JTAG_UART
 #define __ALTERA_AVALON_ONCHIP_MEMORY2
-#define __ALTERA_AVALON_PIO
 #define __ALTERA_NIOS2_GEN2
 #define __CAMERA_MODULE
-#define __CMOS_SENSOR_OUTPUT_GENERATOR
 #define __HPS_BRIDGE_AVALON
 #define __I2C
 #define __LCD_0
@@ -172,7 +170,7 @@
  */
 
 #define ALT_MODULE_CLASS_LCD_0_0 LCD_0
-#define LCD_0_0_BASE 0x10000820
+#define LCD_0_0_BASE 0x10000880
 #define LCD_0_0_IRQ -1
 #define LCD_0_0_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define LCD_0_0_NAME "/dev/LCD_0_0"
@@ -225,23 +223,6 @@
 
 
 /*
- * cmos_sensor_output_generator_0 configuration
- *
- */
-
-#define ALT_MODULE_CLASS_cmos_sensor_output_generator_0 cmos_sensor_output_generator
-#define CMOS_SENSOR_OUTPUT_GENERATOR_0_BASE 0x10000840
-#define CMOS_SENSOR_OUTPUT_GENERATOR_0_IRQ -1
-#define CMOS_SENSOR_OUTPUT_GENERATOR_0_IRQ_INTERRUPT_CONTROLLER_ID -1
-#define CMOS_SENSOR_OUTPUT_GENERATOR_0_MAX_HEIGHT 1080
-#define CMOS_SENSOR_OUTPUT_GENERATOR_0_MAX_WIDTH 1920
-#define CMOS_SENSOR_OUTPUT_GENERATOR_0_NAME "/dev/cmos_sensor_output_generator_0"
-#define CMOS_SENSOR_OUTPUT_GENERATOR_0_PIX_DEPTH 12
-#define CMOS_SENSOR_OUTPUT_GENERATOR_0_SPAN 32
-#define CMOS_SENSOR_OUTPUT_GENERATOR_0_TYPE "cmos_sensor_output_generator"
-
-
-/*
  * hal configuration
  *
  */
@@ -272,7 +253,7 @@
  */
 
 #define ALT_MODULE_CLASS_i2c_0 i2c
-#define I2C_0_BASE 0x10000808
+#define I2C_0_BASE 0x1000080c
 #define I2C_0_IRQ -1
 #define I2C_0_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define I2C_0_NAME "/dev/i2c_0"
@@ -325,32 +306,5 @@
 #define ONCHIP_MEMORY2_0_SPAN 131072
 #define ONCHIP_MEMORY2_0_TYPE "altera_avalon_onchip_memory2"
 #define ONCHIP_MEMORY2_0_WRITABLE 1
-
-
-/*
- * pio_leds configuration
- *
- */
-
-#define ALT_MODULE_CLASS_pio_leds altera_avalon_pio
-#define PIO_LEDS_BASE 0x10000810
-#define PIO_LEDS_BIT_CLEARING_EDGE_REGISTER 0
-#define PIO_LEDS_BIT_MODIFYING_OUTPUT_REGISTER 0
-#define PIO_LEDS_CAPTURE 0
-#define PIO_LEDS_DATA_WIDTH 8
-#define PIO_LEDS_DO_TEST_BENCH_WIRING 0
-#define PIO_LEDS_DRIVEN_SIM_VALUE 0
-#define PIO_LEDS_EDGE_TYPE "NONE"
-#define PIO_LEDS_FREQ 50000000
-#define PIO_LEDS_HAS_IN 0
-#define PIO_LEDS_HAS_OUT 1
-#define PIO_LEDS_HAS_TRI 0
-#define PIO_LEDS_IRQ -1
-#define PIO_LEDS_IRQ_INTERRUPT_CONTROLLER_ID -1
-#define PIO_LEDS_IRQ_TYPE "NONE"
-#define PIO_LEDS_NAME "/dev/pio_leds"
-#define PIO_LEDS_RESET_VALUE 170
-#define PIO_LEDS_SPAN 16
-#define PIO_LEDS_TYPE "altera_avalon_pio"
 
 #endif /* __SYSTEM_H_ */

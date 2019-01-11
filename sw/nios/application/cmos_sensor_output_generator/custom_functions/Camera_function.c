@@ -49,7 +49,7 @@ void Camera_Acquisition_Module_Display_Registers()
 	printf("CAMERA_MODULE_REGISTER_FLAG=%d\r\n",IORD_32DIRECT(CAMERA_MODULE_0_BASE,CAMERA_MODULE_REGISTER_FLAG));
 }
 /* Pixels Generator Part */
-
+#if Frame_Generator
  void Configure_CMOS_Generator(int width, int height)
  {
 	  cmos_sensor_output_generator = cmos_sensor_output_generator_inst(CMOS_SENSOR_OUTPUT_GENERATOR_0_BASE,
@@ -86,6 +86,7 @@ void Camera_Acquisition_Module_Display_Registers()
 	    printf("CMOS_SENSOR_OUTPUT_GENERATOR_STATUS=%d\r\n",IORD_32DIRECT(CMOS_SENSOR_OUTPUT_GENERATOR_0_BASE,CMOS_SENSOR_OUTPUT_GENERATOR_STATUS_OFST));
  }
 
+#endif
  void Test_Camera_Memory()
  {
  	Camera_Acquisition_Module_Stop();
@@ -99,11 +100,7 @@ void Camera_Acquisition_Module_Display_Registers()
  			Capture_Image_Computer(HPS_0_BRIDGES_BASE,1);
  			Capture_Image_Computer(HPS_0_BRIDGES_BASE,0);
  		#endif
- 	while (1)
- 	{
- 		for (int i=0;i<4000000;i++);
 
- 	}
 
  }
  void Capture_Image_Computer(int Address, int Frame)
@@ -113,7 +110,7 @@ void Camera_Acquisition_Module_Display_Registers()
  		FILE *foutput = fopen(filename, "w");
  		if (foutput) {
  			/* Use fprintf function to write to file through file pointer */
- 			fprintf(foutput, "P3\n320 240\n255\n");
+ 			fprintf(foutput, "P3\n320 240\n32\n");
  			printf("Good: open \"%s\" for writing\n", filename);
  			//
  			delay(5000000);
@@ -144,43 +141,7 @@ void Camera_Acquisition_Module_Display_Registers()
 
  		}
  }
- void Test_Function_Generator()
- {
 
- 	int32_t Address=HPS_0_BRIDGES_BASE;
- 	//Camera_Acquisition_Module_Stop();
- 	for (int i=0;i<64;i++)
- 	{
- 		IOWR_32DIRECT(Address, i*4, i);
-
- 	}
- 	Camera_Acquisition_Module_Stop();
- 	//Stop_CMOS_Generator();
- 	delay(5000);
- 	Configure_CMOS_Generator(16,16);
- 	Display_Configuration_Generator();
- 	Camera_Acquisition_Module_SETUP_Address_Memory(Address);
- 	Camera_Acquisition_Module_SETUP_Length_Frame(64);
- 	Camera_Acquisition_Module_Start();
- 	Start_CMOS_Generator();
- 	int j=0;
- 	while (1)
- 	{
- 		delay(10000000);
- 		for (int i=0;i<8;i++)
- 		{
- 			for( j=0;j<8;j++)
- 			{
- 				printf("%d ",IORD_32DIRECT(Address, i*32+j*4));
- 			}
- 			printf("\n");
-
- 		}
- 		printf("\r\n");
- 		printf("\r\n");
- 	}
-
- }
  void delay(int duration )
  {
  	int i;
@@ -198,19 +159,19 @@ void Camera_Acquisition_Module_Display_Registers()
  	Red=(Data & 0xF800)>>11;
  	Blue=(Data & 0x001F);
  	Green=(Data & 0x07E0)>>5;
- 	int Color=Red*255/32;
- 	if(Color>255)
- 		Storage[0]=255;
+ 	int Color=Red;
+ 	if(Color>32)
+ 		Storage[0]=32;
  	else
  		Storage[0]=Color;
- 	Color=Green*255/64;
- 	if(Color>255)
- 		Storage[1]=255;
+ 	Color=Green/2;
+ 	if(Color>32)
+ 		Storage[1]=32;
  	else
  		Storage[1]=Color;
- 	Color=Blue*255/32;
- 	if(Color>255)
- 		Storage[2]=255;
+ 	Color=Blue;
+ 	if(Color>32)
+ 		Storage[2]=32;
  	else
  		Storage[2]=Color;
  	return ;

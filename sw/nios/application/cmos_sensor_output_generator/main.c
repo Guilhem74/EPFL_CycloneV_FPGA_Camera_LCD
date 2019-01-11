@@ -42,7 +42,10 @@ int main(void) {
 	Test_Camera_Memory();
 #endif
 
+	/*while(1)
+	{	LCD_Configuration();
 
+	}*/
 }
 
 

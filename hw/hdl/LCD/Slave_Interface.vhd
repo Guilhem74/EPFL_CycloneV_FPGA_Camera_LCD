@@ -19,16 +19,11 @@ PORT (	clk		: in std_logic;
 			avs_WriteData		: in std_logic_vector(31 downto 0);
 			avs_ReadData		: out std_logic_vector(31 downto 0);
 			
-			Buffer_Saved	: in std_logic_vector(1 downto 0);
-			
-			Display_Buffer	: out std_logic_vector(1 downto 0);
-			
-			Master_Ready	: in std_logic;
+			Buffer_Saved	: in std_logic_vector(1 downto 0);	
+			Display_Buffer	: in std_logic_vector(1 downto 0);	
 			StartAdd			: out std_logic_vector(31 downto 0);
 			LengthBuffer 	: out std_logic_vector(31 downto 0);
-			Master_Start 	: out std_logic;
 			
-			LCD_Control_Ready : in std_logic;
 			Done_Command_Data : in std_logic;
 			State_Command_Data: out std_logic_vector(1 downto 0);
 			Command_Data 		: out std_logic_vector(15 downto 0));
@@ -96,26 +91,15 @@ architecture behavioral of Slave_Interface is
 					State_Command_Data<= (others => '0');
 					StartAdd 			<= (others => '0');
 					LengthBuffer		<= (others => '0');
-					Display_Buffer 	<= "00";
-					Master_Start 		<= '0';
 					RegDisplayBuffer  <= (others => '0');
 					RegBufferSaved		<= (others => '0');
 				elsif rising_edge(clk) then
 					Command_Data 			<= RegCommandData;
 					State_Command_Data 	<= RegStateCommandData;
-					if Master_Ready = '1' and RegCommandData = x"002C" and RegStateCommandData = "01" and LCD_Control_Ready = '1' then -- Needed conditions to start the Master Interface.
-						Master_Start <= '1';
-					else
-						Master_Start <= '0';
-					end if;
-					StartAdd			<= RegStartAdd;
-					LengthBuffer	<= RegLengthBuffer;
-					Display_Buffer <= RegDisplayBuffer;
-					RegBufferSaved <= Buffer_Saved;
-					if Master_Ready = '1' then	-- If the master is available we can change the buffer we want to use.
-						RegDisplayBuffer <= Buffer_Saved;
-					end if;
-					
+					StartAdd					<= RegStartAdd;
+					LengthBuffer			<= RegLengthBuffer;
+					RegBufferSaved 		<= Buffer_Saved;
+					RegDisplayBuffer 		<= Display_Buffer;		
 				end if;
 			
 			end process Communication;

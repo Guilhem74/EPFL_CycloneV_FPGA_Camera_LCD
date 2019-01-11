@@ -8,6 +8,6 @@
 	#define LCD_Connected 1
 	// Debug Camera
 	#define DEBUG_I2C 0
-	#define CAPTURE_IMAGE 1
+	#define CAPTURE_IMAGE 0
 	#define Frame_Generator 0
 #endif

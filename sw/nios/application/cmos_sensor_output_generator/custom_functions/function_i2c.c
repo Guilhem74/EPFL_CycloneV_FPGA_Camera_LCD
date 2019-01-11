@@ -72,10 +72,20 @@ bool Camera_Configuration()
     success &= Write_and_Read_I2C(&i2c,TRDB_D5M_COLUMN_SIZE_REG,2559);//Resolution for lt24 with binning
     success &= Write_and_Read_I2C(&i2c,TRDB_D5M_ROW_SIZE_REG,1919);// Resolution for lt24 with binning
     success &= Write_and_Read_I2C(&i2c,TRDB_D5M_SHUTTER_WIDTH_UPPER_REG,0000);//Control light
-    success &= Write_and_Read_I2C(&i2c,TRDB_D5M_SHUTTER_WIDTH_LOWER_REG,10000);//Control light
+    success &= Write_and_Read_I2C(&i2c,TRDB_D5M_SHUTTER_WIDTH_LOWER_REG,3500);//Control light
     success &= Write_and_Read_I2C(&i2c,TRDB_D5M_ROW_ADDRESS_MODE_REG,0x0033);//Binning x4
     success &= Write_and_Read_I2C(&i2c,TRDB_D5M_COLUMN_ADDRESS_MODE_REG,0x0033);//Binning x4
-
+#if LCD_Connected
+    success &= Write_and_Read_I2C(&i2c,TRDB_D5M_RED_GAIN_REG,15);//Binning x4
+   success &= Write_and_Read_I2C(&i2c,TRDB_D5M_GREEN_1_GAIN_REG,12);//Binning x4
+   success &= Write_and_Read_I2C(&i2c,TRDB_D5M_GREEN_2_GAIN_REG,12);//Binning x4
+   success &= Write_and_Read_I2C(&i2c,TRDB_D5M_BLUE_GAIN_REG,14);//Binning x4
+#else
+   success &= Write_and_Read_I2C(&i2c,TRDB_D5M_RED_GAIN_REG,8);//Binning x4
+  success &= Write_and_Read_I2C(&i2c,TRDB_D5M_GREEN_1_GAIN_REG,12);//Binning x4
+  success &= Write_and_Read_I2C(&i2c,TRDB_D5M_GREEN_2_GAIN_REG,12);//Binning x4
+  success &= Write_and_Read_I2C(&i2c,TRDB_D5M_BLUE_GAIN_REG,10);//Binning x4
+#endif
 
     /*If Using the pll , clock input 25 Mhz, output 95Mhz
      *success &= Write_and_Read_I2C(&i2c,TRDB_D5M_PLL_CONTROL_REG,0x0003);//Power up and use pll

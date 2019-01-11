@@ -11,7 +11,7 @@ use ieee.numeric_std.all;
 entity Full_LCD_Entity is
 PORT ( 	clk	 : in std_logic;	
 			nReset : in std_logic;
-			
+
 			CSX 	: out std_logic;
 			D_CX 	: out std_logic;
 			WRX 	: out std_logic;
@@ -42,7 +42,7 @@ architecture behavioral of Full_LCD_Entity is
 	component Slave_Interface
 	PORT (	clk		: in std_logic;
 				nReset	: in std_logic;
-				
+
 				avs_Address			: in std_logic_vector(2 downto 0);
 				avs_ChipSelect		: in std_logic;
 				avs_Read				: in std_logic;
@@ -50,16 +50,11 @@ architecture behavioral of Full_LCD_Entity is
 				avs_WriteData		: in std_logic_vector(31 downto 0);
 				avs_ReadData		: out std_logic_vector(31 downto 0);
 				
-				Buffer_Saved	: in std_logic_vector(1 downto 0);
-				
-				Display_Buffer	: out std_logic_vector(1 downto 0);
-				
-				Master_Ready	: in std_logic;
+				Buffer_Saved	: in std_logic_vector(1 downto 0);	
+				Display_Buffer	: in std_logic_vector(1 downto 0);	
 				StartAdd			: out std_logic_vector(31 downto 0);
 				LengthBuffer 	: out std_logic_vector(31 downto 0);
-				Master_Start 	: out std_logic;
 				
-				LCD_Control_Ready : in std_logic;
 				Done_Command_Data : in std_logic;
 				State_Command_Data: out std_logic_vector(1 downto 0);
 				Command_Data 		: out std_logic_vector(15 downto 0));
@@ -79,12 +74,13 @@ architecture behavioral of Full_LCD_Entity is
 				
 				StartAdd			: in std_logic_vector(31 downto 0);
 				LengthBuffer 	: in std_logic_vector(31 downto 0);
-				Display_Buffer	: in std_logic_vector(1 downto 0);
-				Master_Start 	: in std_logic;
+				Buffer_Saved	: in std_logic_vector(1 downto 0);
+				Display_Buffer : out std_logic_vector(1 downto 0);
 				
-				Read_16_words	: in std_logic;
+				Write_16			: in std_logic;
+				Master_Start	: in std_logic;
 				Master_Ready 	: out std_logic;
-				Waiting_Space	: out std_logic;
+				Master_Waiting	: out std_logic;
 				
 				Full_FIFO			: in std_logic;
 				Empty_FIFO			: in std_logic;
@@ -117,14 +113,14 @@ architecture behavioral of Full_LCD_Entity is
 				Empty_FIFO		: in std_logic;
 				Read_FIFO 		: out std_logic;
 				
-				Master_Ready : in std_logic;
-				Waiting_Space: in std_logic;
-				Read_16_Words: out std_logic;
+				Master_Ready 	: in std_logic;
+				Master_Waiting	: in std_logic;
+				Master_Start	: out std_logic;
+				Write_16			: out std_logic;
 				
 				Command_Data 		: in std_logic_vector(15 downto 0);
 				State_Command_Data: in std_logic_vector(1 downto 0);
 				Done_Command_Data : out std_logic;
-				LCD_Control_Ready : out std_logic;
 				
 				CSX 	: out std_logic;
 				D_CX 	: out std_logic;
@@ -133,14 +129,15 @@ architecture behavioral of Full_LCD_Entity is
 				D 		: out std_logic_vector(15 downto 0));
 	end component LCD_Control;
 	
-	signal Done_Command_Data_in, LCD_Control_Ready_in 	: std_logic;
-	signal State_Command_Data_in 								: std_logic_vector(1 downto 0);
-	signal Command_Data_in										: std_logic_vector(15 downto 0);
+	signal Done_Command_Data_in 	: std_logic;
+	signal State_Command_Data_in 	: std_logic_vector(1 downto 0);
+	signal Command_Data_in			: std_logic_vector(15 downto 0);
 	
 	signal StartAdd_in, LengthBuffer_in			: std_logic_vector(31 downto 0);
-	signal Display_Buffer_in 						: std_logic_vector(1 downto 0);
+	signal Display_Buffer_in, Buffer_Saved_in	: std_logic_vector(1 downto 0);
+	
 	signal Master_Start_in, Master_Ready_in 	: std_logic;
-	signal Read_16_Words_in, Waiting_Space_in : std_logic;
+	signal Master_Waiting_in, Write_16_in 		: std_logic;
 	
 	signal Write_FIFO_in, Read_FIFO_in 	: std_logic;
 	signal Full_FIFO_in, Empty_FIFO_in 	: std_logic;
@@ -151,18 +148,16 @@ architecture behavioral of Full_LCD_Entity is
 	
 	begin
 	
-	Display_Buffer <= Display_Buffer_in;
+	Display_Buffer 	<= Display_Buffer_in;
+	Buffer_Saved_in 	<= Buffer_Saved;
 	
 	Slave : Slave_Interface	PORT MAP (	clk 							=> clk,
 													nReset 						=> nReset,
-													LCD_Control_Ready			=> LCD_Control_Ready_in,
 													State_Command_Data		=> State_Command_Data_in,
 													Done_Command_Data			=> Done_Command_Data_in,
 													Buffer_Saved				=> Buffer_Saved,
-													Master_Ready				=> Master_Ready_in,
 													Command_Data		 		=> Command_Data_in,
 													Display_Buffer				=> Display_Buffer_in,
-													Master_Start				=> Master_Start_in,
 													StartAdd						=> StartAdd_in,
 													LengthBuffer				=> LengthBuffer_in,
 													avs_Address					=> avs_Address,
@@ -175,9 +170,10 @@ architecture behavioral of Full_LCD_Entity is
 		Master : Master_Interface PORT MAP (	clk					=> clk,
 															nReset				=> nReset,
 															Full_FIFO			=> Full_FIFO_in,
-															Waiting_Space		=> Waiting_Space_in,
-															Read_16_Words		=> Read_16_Words_in,
+															Master_Waiting		=> Master_Waiting_in,
+															Write_16				=> Write_16_in,
 															Empty_FIFO			=> Empty_FIFO_in,
+															Buffer_Saved		=> Buffer_Saved_in,
 															Display_Buffer		=> Display_Buffer_in,
 															Master_Start		=> Master_Start_in,
 															StartAdd				=> StartAdd_in,
@@ -209,13 +205,13 @@ architecture behavioral of Full_LCD_Entity is
 																nReset 						=> nReset,
 																Read_FIFO_Data 			=> Read_FIFO_Data_in,
 																Read_FIFO_Word				=> Read_FIFO_Word_in,
-																Waiting_Space				=> Waiting_Space_in,
-																Read_16_Words				=> Read_16_Words_in,
+																Master_Waiting				=> Master_Waiting_in,
+																Write_16						=> Write_16_in,
 																Empty_FIFO					=> Empty_FIFO_in,
 																Full_FIFO					=> Full_FIFO_in,
 																Read_FIFO 					=> Read_FIFO_in,
 																Master_Ready 				=> Master_Ready_in,
-																LCD_Control_Ready			=> LCD_Control_Ready_in,
+																Master_Start				=> Master_Start_in,
 																Command_Data		 		=> Command_Data_in,
 																State_Command_Data		=> State_Command_Data_in,
 																Done_Command_Data			=> Done_Command_Data_in,

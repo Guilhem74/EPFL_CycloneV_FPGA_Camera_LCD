@@ -44,17 +44,17 @@ entity DE0_Nano_SoC_TRDB_D5M_LT24_top_level is
         SW : in std_logic_vector(3 downto 0);
 
         -- GPIO_0
-        GPIO_0_LT24_ADC_BUSY     : in  std_logic;
-        GPIO_0_LT24_ADC_CS_N     : out std_logic;
-        GPIO_0_LT24_ADC_DCLK     : out std_logic;
-        GPIO_0_LT24_ADC_DIN      : out std_logic;
-        GPIO_0_LT24_ADC_DOUT     : in  std_logic;
-        GPIO_0_LT24_ADC_PENIRQ_N : in  std_logic;
+--        GPIO_0_LT24_ADC_BUSY     : in  std_logic;
+--        GPIO_0_LT24_ADC_CS_N     : out std_logic;
+--        GPIO_0_LT24_ADC_DCLK     : out std_logic;
+--        GPIO_0_LT24_ADC_DIN      : out std_logic;
+--        GPIO_0_LT24_ADC_DOUT     : in  std_logic;
+--        GPIO_0_LT24_ADC_PENIRQ_N : in  std_logic;
         GPIO_0_LT24_CS_N         : out std_logic;
         GPIO_0_LT24_D            : out std_logic_vector(15 downto 0);
-        GPIO_0_LT24_LCD_ON       : out std_logic;
+--        GPIO_0_LT24_LCD_ON       : out std_logic;
         GPIO_0_LT24_RD_N         : out std_logic;
-        GPIO_0_LT24_RESET_N      : out std_logic;
+--        GPIO_0_LT24_RESET_N      : out std_logic;
         GPIO_0_LT24_RS           : out std_logic;
         GPIO_0_LT24_WR_N         : out std_logic;
 
@@ -193,11 +193,7 @@ architecture rtl of DE0_Nano_SoC_TRDB_D5M_LT24_top_level is
 			hps_0_io_hps_io_gpio_inst_GPIO61                       : inout std_logic                     := 'X';             -- hps_io_gpio_inst_GPIO61
 			i2c_0_i2c_scl                                          : inout std_logic                     := 'X';             -- scl
 			i2c_0_i2c_sda                                          : inout std_logic                     := 'X';             -- sda
-			pio_leds_external_connection_export                    : out   std_logic_vector(7 downto 0);                     -- export
 			reset_reset_n                                          : in    std_logic                     := 'X';             -- reset_n
-			cmos_sensor_output_generator_0_cmos_sensor_frame_valid : out   std_logic;                                        -- frame_valid
-			cmos_sensor_output_generator_0_cmos_sensor_line_valid  : out   std_logic;                                        -- line_valid
-			cmos_sensor_output_generator_0_cmos_sensor_data        : out   std_logic_vector(11 downto 0);                    -- data
 			camera_module_0_conduit_camera_debug                      : out   std_logic_vector(31 downto 0);                    -- debug
 			camera_module_0_conduit_camera_data_sensors_camera          : in    std_logic_vector(11 downto 0) := (others => 'X'); -- writebyteenable_n
 			camera_module_0_conduit_camera_input_fval                 : in    std_logic                     := 'X';             -- input_fval
@@ -286,12 +282,8 @@ begin
         hps_0_io_hps_io_gpio_inst_GPIO53    => HPS_LED,
         hps_0_io_hps_io_gpio_inst_GPIO54    => HPS_KEY_N,
         hps_0_io_hps_io_gpio_inst_GPIO61    => HPS_GSENSOR_INT,
-        pio_leds_external_connection_export => open,--LED,
 		  i2c_0_i2c_scl                                          => GPIO_1_D5M_SCLK,                                          --                                  i2c_0_i2c.scl
 		  i2c_0_i2c_sda                                          => GPIO_1_D5M_SDATA,                                          --     
-		  cmos_sensor_output_generator_0_cmos_sensor_frame_valid => open, -- cmos_sensor_output_generator_0_cmos_sensor.frame_valid
-		  cmos_sensor_output_generator_0_cmos_sensor_line_valid  => open,  --                                           .line_valid
-		  cmos_sensor_output_generator_0_cmos_sensor_data        => open,        --                                           .data
 		  camera_module_0_conduit_camera_data_sensors_camera        => GPIO_1_D5M_D, 		  
 		  camera_module_0_conduit_camera_input_fval                 => GPIO_1_D5M_FVAL,                 --                                           .input_fval
 		  camera_module_0_conduit_camera_input_lval                 => GPIO_1_D5M_LVAL,                 --                                           .input_lval
@@ -311,6 +303,5 @@ begin
 		GPIO_1_D5M_XCLKIN<= FPGA_CLK1_50;
 		GPIO_1_D5M_RESET_N<= (KEY_N(0));
 		GPIO_1_D5M_TRIGGER <=not(KEY_N(1));
-		LED(1 downto 0) <= CONNECTED_TO_camera_module_0_conduit_camera_lcd_buffer_saved;
-		  
+		LED(1 downto 0) <= (CONNECTED_TO_camera_module_0_conduit_camera_lcd_buffer_saved);
 end;
