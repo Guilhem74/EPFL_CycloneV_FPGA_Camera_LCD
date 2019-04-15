@@ -10,7 +10,7 @@ Board : Cyclone V DE1-SoC Board
 
 The LCD part has been developped by Pierre
 
-The CAMERA part hasb been developped by myself. 
+The CAMERA part has been developped by myself. 
 
 Software : Quartus
 
