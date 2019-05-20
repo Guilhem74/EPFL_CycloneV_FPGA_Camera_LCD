@@ -5,6 +5,7 @@ Project done for the Embedded system course at EPFL.
 In collaboration with Pierre Fourcade.
 
 Goal : Capture and display the image seen by a camera on a LCD without using a processor.
+Two DMA units have been developped in order to capture and store the image from the camera and then to read and display it on a LCD
 
 Board : Cyclone V DE1-SoC Board
 
